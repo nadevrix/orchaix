@@ -1,0 +1,84 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Representa a los comercios registrados
+model Merchant {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  username     String    @unique // Usado en URL: /[country]/[username]/[project_slug]
+  passwordHash String
+  businessName String
+  country      String    @default("es") // Código de país de 2 letras (ej: es, mx, us)
+  projects     Project[]
+  createdAt    DateTime  @default(now())
+}
+
+// Proyectos creados por cada comercio
+model Project {
+  id                  String         @id @default(uuid())
+  merchantId          String
+  merchant            Merchant       @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  name                String
+  description         String?
+  slug                String         // Usado en URL: /[country]/[username]/[project_slug]
+  restrictedCountries String[]       // Países bloqueados para este proyecto
+  agents              Agent[]
+  createdAt           DateTime       @default(now())
+
+  @@unique([merchantId, slug])
+}
+
+// Agentes de IA especializados dentro de cada proyecto
+model Agent {
+  id                String        @id @default(uuid())
+  projectId         String
+  project           Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  name              String        // Ventas, Soporte, Info, etc.
+  slug              String        // ventas, soporte, info, etc.
+  systemInstruction String        @db.Text
+  telegramToken     String?       // Token del bot de Telegram específico de este agente
+  chatSessions      ChatSession[]
+  documents         Document[]
+  createdAt         DateTime      @default(now())
+
+  @@unique([projectId, slug])
+}
+
+// Documentos/Datos de entrenamiento del chat de la IA (RAG)
+model Document {
+  id         String   @id @default(uuid())
+  agentId    String
+  agent      Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  title      String
+  content    String   @db.Text
+  sourceType String   // "text" | "url"
+  createdAt  DateTime @default(now())
+}
+
+// Sesiones de conversación de los clientes
+model ChatSession {
+  id               String    @id @default(uuid())
+  agentId          String
+  agent            Agent     @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  clientIdentifier String    // browser_id (web/SDK), telegram_chat_id o device_id (móvil)
+  platform         String    // "web" | "mobile" | "telegram" | "sdk"
+  messages         Message[]
+  createdAt        DateTime  @default(now())
+}
+
+// Historial de mensajes individuales
+model Message {
+  id            String      @id @default(uuid())
+  chatSessionId String
+  chatSession   ChatSession @relation(fields: [chatSessionId], references: [id], onDelete: Cascade)
+  sender        String      // "user" | "ai"
+  content       String      @db.Text
+  createdAt     DateTime    @db.Timestamp @default(now())
+}
+
