@@ -41,6 +41,7 @@ model Agent {
   project           Project       @relation(fields: [projectId], references: [id], onDelete: Cascade)
   name              String        // Ventas, Soporte, Info, etc.
   slug              String        // ventas, soporte, info, etc.
+  rawInstruction    String?       @db.Text
   systemInstruction String        @db.Text
   telegramToken     String?       // Token del bot de Telegram específico de este agente
   chatSessions      ChatSession[]

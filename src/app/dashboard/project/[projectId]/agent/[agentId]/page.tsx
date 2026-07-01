@@ -21,6 +21,7 @@ interface Agent {
   projectId: string;
   name: string;
   slug: string;
+  rawInstruction: string | null;
   systemInstruction: string;
   telegramToken: string | null;
   createdAt: string;
@@ -44,8 +45,10 @@ export default function AgentDetailPage() {
   // Form State - Agent settings
   const [name, setName] = useState('');
   const [slug, setSlug] = useState('');
+  const [rawInstruction, setRawInstruction] = useState('');
   const [systemInstruction, setSystemInstruction] = useState('');
   const [telegramToken, setTelegramToken] = useState('');
+  const [isOrchestrating, setIsOrchestrating] = useState(false);
   const [configLoading, setConfigLoading] = useState(false);
   const [configSuccess, setConfigSuccess] = useState(false);
   const [configError, setConfigError] = useState('');
@@ -87,6 +90,7 @@ export default function AgentDetailPage() {
         setAgent(ag);
         setName(ag.name);
         setSlug(ag.slug);
+        setRawInstruction(ag.rawInstruction || '');
         setSystemInstruction(ag.systemInstruction);
         setTelegramToken(ag.telegramToken || '');
       } else {
@@ -148,6 +152,7 @@ export default function AgentDetailPage() {
         body: JSON.stringify({
           name,
           slug,
+          rawInstruction,
           systemInstruction,
           telegramToken: telegramToken || null,
         }),
@@ -166,6 +171,37 @@ export default function AgentDetailPage() {
       setConfigError(err.message || 'Error al conectar con el servidor');
     } finally {
       setConfigLoading(false);
+    }
+  };
+
+  // Orchestrate (Edit page)
+  const handleOrchestrateAgent = async () => {
+    if (!rawInstruction.trim()) return;
+    setConfigError('');
+    setIsOrchestrating(true);
+
+    const token = localStorage.getItem('merchant_token');
+    if (!token) return;
+
+    try {
+      const res = await fetch('/api/orchestrate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ rawInstruction }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al orquestar la IA');
+      
+      setSystemInstruction(data.prompt);
+      alert('IA Optimizada: ' + data.summary + '\n\nRecuerda hacer clic en "Guardar Configuración" para aplicar los cambios.');
+    } catch (err: any) {
+      setConfigError(err.message || 'Error de conexión con el Orquestador');
+    } finally {
+      setIsOrchestrating(false);
     }
   };
 
@@ -425,23 +461,51 @@ export default function AgentDetailPage() {
                 </div>
 
                 {/* System instructions */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center gap-1">
-                    Instrucciones de Comportamiento del Chat de la IA (System Prompt)
-                    <span title="Define el rol de este Chat de la IA (ej. experto en ventas, chat de soporte).">
-                      <HelpCircle className="w-3.5 h-3.5 text-zinc-500" />
-                    </span>
-                  </label>
-                  <textarea
-                    required
-                    rows={6}
-                    value={systemInstruction}
-                    onChange={(e) => setSystemInstruction(e.target.value)}
-                    className="w-full px-3 py-2 bg-zinc-950/40 border border-zinc-800 rounded-lg text-white focus:outline-none focus:border-[#00e5ff]/50 transition-all text-xs resize-none"
-                  />
-                  <p className="text-[10px] text-zinc-500 leading-normal">
-                    Este Chat de la IA consultará de forma autónoma los documentos cargados en su pestaña de "Datos del Comercio" y se limitará estrictamente a responder sobre ellos, denegando preguntas fuera de contexto.
-                  </p>
+                <div className="space-y-4">
+                  <div className="space-y-1.5 p-4 rounded-xl border border-purple-500/30 bg-purple-500/5">
+                    <label className="text-xs font-semibold text-purple-300 uppercase tracking-wider flex items-center justify-between">
+                      <span className="flex items-center gap-1">
+                        <Sparkles className="w-3.5 h-3.5" /> Instrucciones Simples
+                      </span>
+                    </label>
+                    <textarea
+                      rows={3}
+                      placeholder="Ej: Quiero que venda zapatos..."
+                      value={rawInstruction}
+                      onChange={(e) => setRawInstruction(e.target.value)}
+                      className="w-full px-3 py-2 bg-zinc-950/40 border border-purple-500/30 rounded-lg text-white focus:outline-none focus:border-purple-400 transition-all text-xs resize-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleOrchestrateAgent}
+                      disabled={isOrchestrating || !rawInstruction.trim()}
+                      className="w-full mt-2 py-2 px-4 bg-gradient-to-r from-purple-500 to-[#00e5ff] hover:from-purple-400 hover:to-[#33ebff] disabled:opacity-50 text-white font-bold rounded-lg text-xs transition-all shadow flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      {isOrchestrating ? <Loader2 className="w-3.5 h-3.5 animate-spin text-white" /> : <Sparkles className="w-3.5 h-3.5 text-white" />}
+                      {isOrchestrating ? 'Orquestando IA...' : 'Re-Optimizar con Orquestador IA'}
+                    </button>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider flex items-center justify-between">
+                      <span className="flex items-center gap-1">
+                        Instrucciones Técnicas (System Prompt)
+                        <span title="Este es el prompt avanzado generado por el Orquestador. Puedes editarlo manualmente.">
+                          <HelpCircle className="w-3.5 h-3.5 text-zinc-500" />
+                        </span>
+                      </span>
+                    </label>
+                    <textarea
+                      required
+                      rows={6}
+                      value={systemInstruction}
+                      onChange={(e) => setSystemInstruction(e.target.value)}
+                      className="w-full px-3 py-2 bg-zinc-950/40 border border-zinc-800 rounded-lg text-zinc-400 focus:text-white focus:outline-none focus:border-[#00e5ff]/50 transition-all text-xs resize-none font-mono"
+                    />
+                    <p className="text-[10px] text-zinc-500 leading-normal">
+                      Este Chat de la IA consultará de forma autónoma los documentos cargados en su pestaña de "Datos del Comercio".
+                    </p>
+                  </div>
                 </div>
 
                 {/* Telegram Bot Token */}

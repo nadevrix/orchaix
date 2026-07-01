@@ -56,7 +56,7 @@ export async function PUT(
 
     const { projectId, agentId } = await params;
     const body = await req.json().catch(() => ({}));
-    const { name, slug, systemInstruction, telegramToken } = body;
+    const { name, slug, systemInstruction, rawInstruction, telegramToken } = body;
 
     // Check project belongs to merchant and agent belongs to project
     const agent = await prisma.agent.findFirst({
@@ -80,6 +80,7 @@ export async function PUT(
 
     if (name !== undefined) updateData.name = name;
     if (systemInstruction !== undefined) updateData.systemInstruction = systemInstruction;
+    if (rawInstruction !== undefined) updateData.rawInstruction = rawInstruction;
     if (telegramToken !== undefined) {
       updateData.telegramToken = telegramToken || null;
 

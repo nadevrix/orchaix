@@ -37,10 +37,12 @@ export default function ProjectDetailPage() {
   // Add Agent Form State
   const [agentName, setAgentName] = useState('');
   const [agentSlug, setAgentSlug] = useState('');
-  const [agentInstruction, setAgentInstruction] = useState('');
+  const [agentRawInstruction, setAgentRawInstruction] = useState('');
   const [agentLoading, setAgentLoading] = useState(false);
   const [agentError, setAgentError] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [orchestratedData, setOrchestratedData] = useState<{ prompt: string; summary: string } | null>(null);
+  const [isOrchestrating, setIsOrchestrating] = useState(false);
 
   // Auto-generate agent slug from name
   const handleAgentNameChange = (val: string) => {
@@ -99,16 +101,50 @@ export default function ProjectDetailPage() {
     fetchProjectData(token);
   }, [projectId, router, fetchProjectData]);
 
-  // Create Agent (Chat de la IA)
-  const handleCreateAgent = async (e: React.FormEvent) => {
+  // Orchestrate Agent Instruction
+  const handleOrchestrateAgent = async (e: React.FormEvent) => {
     e.preventDefault();
+    setAgentError('');
+    setIsOrchestrating(true);
+
+    const token = localStorage.getItem('merchant_token');
+    if (!token) return;
+
+    if (!agentRawInstruction.trim()) {
+      setAgentError('Por favor, ingresa instrucciones para la IA.');
+      setIsOrchestrating(false);
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/orchestrate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ rawInstruction: agentRawInstruction }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Error al orquestar la IA');
+      
+      setOrchestratedData(data);
+    } catch (err: any) {
+      setAgentError(err.message || 'Error de conexión con el Orquestador');
+    } finally {
+      setIsOrchestrating(false);
+    }
+  };
+
+  // Create Agent (Confirm)
+  const handleConfirmCreateAgent = async () => {
+    if (!orchestratedData) return;
     setAgentError('');
     setAgentLoading(true);
 
     const token = localStorage.getItem('merchant_token');
     if (!token) return;
-
-    const defaultInstruction = agentInstruction || `Eres el chatbot oficial de este proyecto. Sé amable y responde basándote en los datos de negocio que cargaremos en tu sección.`;
 
     try {
       const res = await fetch(`/api/projects/${projectId}/agents`, {
@@ -120,7 +156,8 @@ export default function ProjectDetailPage() {
         body: JSON.stringify({
           name: agentName,
           slug: agentSlug.toLowerCase(),
-          systemInstruction: defaultInstruction,
+          rawInstruction: agentRawInstruction,
+          systemInstruction: orchestratedData.prompt,
         }),
       });
 
@@ -133,7 +170,8 @@ export default function ProjectDetailPage() {
       setAgents([...agents, data.agent]);
       setAgentName('');
       setAgentSlug('');
-      setAgentInstruction('');
+      setAgentRawInstruction('');
+      setOrchestratedData(null);
       setShowCreateForm(false);
     } catch (err: any) {
       setAgentError(err.message || 'Error de conexión');
@@ -226,75 +264,120 @@ export default function ProjectDetailPage() {
               <div className="flex justify-between items-center mb-4">
                 <h4 className="text-xs font-bold text-white uppercase tracking-wider">Registrar Nuevo Chat de la IA</h4>
                 <button 
-                  onClick={() => setShowCreateForm(false)}
+                  onClick={() => {
+                    setShowCreateForm(false);
+                    setOrchestratedData(null);
+                  }}
                   className="text-xs text-zinc-400 hover:text-white cursor-pointer"
                 >
                   Cancelar
                 </button>
               </div>
 
-              <form onSubmit={handleCreateAgent} className="space-y-4">
-                {agentError && (
-                  <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
-                    {agentError}
-                  </div>
-                )}
+              {!orchestratedData ? (
+                <form onSubmit={handleOrchestrateAgent} className="space-y-4">
+                  {agentError && (
+                    <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+                      {agentError}
+                    </div>
+                  )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">
+                        Nombre del Chat de la IA
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Ej: Asistente Ventas, Soporte Tecnico"
+                        value={agentName}
+                        onChange={(e) => handleAgentNameChange(e.target.value)}
+                        className="w-full px-3 py-2 bg-zinc-950/40 border border-zinc-800 rounded-lg text-white placeholder-zinc-600 focus:outline-none focus:border-[#00e5ff]/50 transition-all text-xs"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">
+                        Slug URL del Chat de la IA
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Ej: ventas, soporte"
+                        value={agentSlug}
+                        onChange={(e) => setAgentSlug(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
+                        className="w-full px-3 py-2 bg-zinc-950/40 border border-zinc-800 rounded-lg text-white placeholder-zinc-600 focus:outline-none focus:border-[#00e5ff]/50 transition-all text-xs font-mono"
+                      />
+                    </div>
+                  </div>
+
                   <div className="space-y-1.5">
                     <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">
-                      Nombre del Chat de la IA
+                      Instrucciones Simples (¿Qué quieres que haga tu IA?)
                     </label>
-                    <input
-                      type="text"
+                    <textarea
+                      rows={3}
                       required
-                      placeholder="Ej: Asistente Ventas, Soporte Tecnico"
-                      value={agentName}
-                      onChange={(e) => handleAgentNameChange(e.target.value)}
-                      className="w-full px-3 py-2 bg-zinc-950/40 border border-zinc-800 rounded-lg text-white placeholder-zinc-600 focus:outline-none focus:border-[#00e5ff]/50 transition-all text-xs"
+                      placeholder="Ej: Quiero que venda zapatos y agende citas."
+                      value={agentRawInstruction}
+                      onChange={(e) => setAgentRawInstruction(e.target.value)}
+                      className="w-full px-3 py-2 bg-zinc-950/40 border border-zinc-800 rounded-lg text-white placeholder-zinc-600 focus:outline-none focus:border-[#00e5ff]/50 transition-all text-xs resize-none"
                     />
+                    <p className="text-[10px] text-zinc-500">
+                      Escribe con tus propias palabras. Nuestro Orquestador IA lo convertirá en un sistema técnico robusto.
+                    </p>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">
-                      Slug URL del Chat de la IA
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Ej: ventas, soporte"
-                      value={agentSlug}
-                      onChange={(e) => setAgentSlug(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
-                      className="w-full px-3 py-2 bg-zinc-950/40 border border-zinc-800 rounded-lg text-white placeholder-zinc-600 focus:outline-none focus:border-[#00e5ff]/50 transition-all text-xs font-mono"
-                    />
+                  <button
+                    type="submit"
+                    disabled={isOrchestrating}
+                    className="w-full py-2.5 px-4 bg-gradient-to-r from-purple-500 to-[#00e5ff] hover:from-purple-400 hover:to-[#33ebff] disabled:opacity-50 text-white font-bold rounded-lg text-xs transition-all shadow flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    {isOrchestrating ? <Loader2 className="w-3.5 h-3.5 animate-spin text-white" /> : <Sparkles className="w-3.5 h-3.5 text-white" />}
+                    {isOrchestrating ? 'Orquestando IA...' : 'Optimizar con IA'}
+                  </button>
+                </form>
+              ) : (
+                <div className="space-y-4 animate-fade-in">
+                  <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20">
+                    <h5 className="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Así es como hemos orquestado tu IA:
+                    </h5>
+                    <p className="text-sm font-medium text-white">
+                      "{orchestratedData.summary}"
+                    </p>
+                    <p className="text-[10px] text-zinc-400 mt-2">
+                      El prompt técnico completo se ha generado y permanecerá oculto. ¿Estás de acuerdo con esta configuración?
+                    </p>
+                  </div>
+                  
+                  {agentError && (
+                    <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+                      {agentError}
+                    </div>
+                  )}
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setOrchestratedData(null)}
+                      disabled={agentLoading}
+                      className="flex-1 py-2.5 px-4 bg-zinc-900 hover:bg-zinc-800 disabled:opacity-50 border border-zinc-800 text-white font-bold rounded-lg text-xs transition-all cursor-pointer"
+                    >
+                      Editar Instrucciones
+                    </button>
+                    <button
+                      onClick={handleConfirmCreateAgent}
+                      disabled={agentLoading}
+                      className="flex-1 py-2.5 px-4 bg-[#00e5ff] hover:bg-[#33ebff] disabled:opacity-50 text-zinc-950 font-bold rounded-lg text-xs transition-all shadow flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      {agentLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                      Aceptar y Crear Agente
+                    </button>
                   </div>
                 </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">
-                    Instrucciones de comportamiento (System Prompt)
-                  </label>
-                  <textarea
-                    rows={3}
-                    placeholder="Ej: Eres un experto en ventas de calzado deportivo. Saluda y guía al usuario para realizar su compra..."
-                    value={agentInstruction}
-                    onChange={(e) => setAgentInstruction(e.target.value)}
-                    className="w-full px-3 py-2 bg-zinc-950/40 border border-zinc-800 rounded-lg text-white placeholder-zinc-655 focus:outline-none focus:border-[#00e5ff]/50 transition-all text-xs resize-none"
-                  />
-                  <p className="text-[10px] text-zinc-500">
-                    Al crear este chat de la IA, podrás ingresar a su configuración para cargar los datos del comercio y FAQs específicos que usará para responder.
-                  </p>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={agentLoading}
-                  className="w-full py-2.5 px-4 bg-[#00e5ff] hover:bg-[#33ebff] disabled:bg-[#00e5ff]/40 text-zinc-950 font-bold rounded-lg text-xs transition-all shadow flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  {agentLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-950" /> : <Plus className="w-3.5 h-3.5" />}
-                  Crear Chat de la IA
-                </button>
-              </form>
+              )}
             </div>
           )}
 

@@ -58,7 +58,7 @@ export async function POST(
 
     const { projectId } = await params;
     const body = await req.json().catch(() => ({}));
-    const { name, slug, systemInstruction, telegramToken } = body;
+    const { name, slug, systemInstruction, rawInstruction, telegramToken } = body;
 
     if (!name || !slug || !systemInstruction) {
       return NextResponse.json(
@@ -112,6 +112,7 @@ export async function POST(
         name,
         slug: slug.toLowerCase(),
         systemInstruction,
+        rawInstruction,
         telegramToken: telegramToken || null,
       },
     });
