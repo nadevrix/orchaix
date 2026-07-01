@@ -203,31 +203,31 @@ export default function ProjectDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#090b11] flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-10 h-10 text-[#00e5ff] animate-spin" />
-          <p className="text-zinc-400 text-sm">Cargando proyecto...</p>
+          <Loader2 className="w-10 h-10 text-[#0F766E] animate-spin" />
+          <p className="text-slate-500 text-sm">Cargando proyecto...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#090b11] text-white flex flex-col">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
       {/* Navbar */}
-      <nav className="border-b border-zinc-900 bg-[#090b11]/80 backdrop-blur-md sticky top-0 z-40">
+      <nav className="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center gap-4">
             <Link 
               href="/dashboard"
-              className="p-2 rounded-lg hover:bg-zinc-800 border border-zinc-800 text-zinc-400 hover:text-white transition-all cursor-pointer"
+              className="p-2 rounded-lg bg-white hover:bg-slate-50 border border-slate-300 text-slate-500 hover:text-slate-900 transition-all cursor-pointer shadow-sm"
             >
               <ArrowLeft className="w-4 h-4" />
             </Link>
 
             <div className="flex items-center gap-2.5">
-              <Logo size={28} />
-              <span className="font-extrabold text-sm tracking-tight text-white">
+              <Logo size={28} showText={false} />
+              <span className="font-extrabold text-sm tracking-tight text-slate-900">
                 {project?.name}
               </span>
             </div>
@@ -239,10 +239,10 @@ export default function ProjectDetailPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full flex-1">
         <div className="space-y-6">
           {/* Header section & Create button */}
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-zinc-900 pb-6">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-slate-200 pb-6">
             <div>
-              <h1 className="text-2xl font-extrabold text-white">Chats de la IA</h1>
-              <p className="text-xs text-zinc-400 mt-1">
+              <h1 className="text-2xl font-extrabold text-slate-900">Chats de la IA</h1>
+              <p className="text-xs text-slate-500 mt-1">
                 Administra los chats de la IA independientes de este proyecto. Cada chat puede tener su personalidad, sus propios datos y su URL única.
               </p>
             </div>
@@ -250,7 +250,7 @@ export default function ProjectDetailPage() {
             {!showCreateForm && (
               <button
                 onClick={() => setShowCreateForm(true)}
-                className="py-2.5 px-4 bg-[#00e5ff] hover:bg-[#33ebff] text-zinc-950 font-bold rounded-xl text-xs transition-all shadow flex items-center justify-center gap-1.5 cursor-pointer self-start sm:self-auto"
+                className="py-2.5 px-4 bg-[#0F766E] hover:bg-[#115E59] text-white font-bold rounded-xl text-xs transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer self-start sm:self-auto"
               >
                 <Plus className="w-4 h-4" />
                 Nuevo Chat de la IA
@@ -260,15 +260,15 @@ export default function ProjectDetailPage() {
 
           {/* Create Agent Form */}
           {showCreateForm && (
-            <div className="glass rounded-2xl p-6 border border-zinc-850 animate-fade-in">
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm animate-fade-in">
               <div className="flex justify-between items-center mb-4">
-                <h4 className="text-xs font-bold text-white uppercase tracking-wider">Registrar Nuevo Chat de la IA</h4>
+                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">Registrar Nuevo Chat de la IA</h4>
                 <button 
                   onClick={() => {
                     setShowCreateForm(false);
                     setOrchestratedData(null);
                   }}
-                  className="text-xs text-zinc-400 hover:text-white cursor-pointer"
+                  className="text-xs text-slate-400 hover:text-slate-600 font-semibold cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -277,14 +277,14 @@ export default function ProjectDetailPage() {
               {!orchestratedData ? (
                 <form onSubmit={handleOrchestrateAgent} className="space-y-4">
                   {agentError && (
-                    <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+                    <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-xs">
                       {agentError}
                     </div>
                   )}
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">
+                      <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
                         Nombre del Chat de la IA
                       </label>
                       <input
@@ -293,12 +293,12 @@ export default function ProjectDetailPage() {
                         placeholder="Ej: Asistente Ventas, Soporte Tecnico"
                         value={agentName}
                         onChange={(e) => handleAgentNameChange(e.target.value)}
-                        className="w-full px-3 py-2 bg-zinc-950/40 border border-zinc-800 rounded-lg text-white placeholder-zinc-600 focus:outline-none focus:border-[#00e5ff]/50 transition-all text-xs"
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-xs"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">
+                      <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
                         Slug URL del Chat de la IA
                       </label>
                       <input
@@ -307,13 +307,13 @@ export default function ProjectDetailPage() {
                         placeholder="Ej: ventas, soporte"
                         value={agentSlug}
                         onChange={(e) => setAgentSlug(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
-                        className="w-full px-3 py-2 bg-zinc-950/40 border border-zinc-800 rounded-lg text-white placeholder-zinc-600 focus:outline-none focus:border-[#00e5ff]/50 transition-all text-xs font-mono"
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-xs font-mono"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold text-zinc-400 uppercase tracking-wider block">
+                    <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
                       Instrucciones Simples (¿Qué quieres que haga tu IA?)
                     </label>
                     <textarea
@@ -322,9 +322,9 @@ export default function ProjectDetailPage() {
                       placeholder="Ej: Quiero que venda zapatos y agende citas."
                       value={agentRawInstruction}
                       onChange={(e) => setAgentRawInstruction(e.target.value)}
-                      className="w-full px-3 py-2 bg-zinc-950/40 border border-zinc-800 rounded-lg text-white placeholder-zinc-600 focus:outline-none focus:border-[#00e5ff]/50 transition-all text-xs resize-none"
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-xs resize-none"
                     />
-                    <p className="text-[10px] text-zinc-500">
+                    <p className="text-[10px] text-slate-500">
                       Escribe con tus propias palabras. Nuestro Orquestador IA lo convertirá en un sistema técnico robusto.
                     </p>
                   </div>
@@ -332,7 +332,7 @@ export default function ProjectDetailPage() {
                   <button
                     type="submit"
                     disabled={isOrchestrating}
-                    className="w-full py-2.5 px-4 bg-gradient-to-r from-purple-500 to-[#00e5ff] hover:from-purple-400 hover:to-[#33ebff] disabled:opacity-50 text-white font-bold rounded-lg text-xs transition-all shadow flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full py-2.5 px-4 bg-[#0F766E] hover:bg-[#115E59] disabled:opacity-50 text-white font-bold rounded-lg text-xs transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     {isOrchestrating ? <Loader2 className="w-3.5 h-3.5 animate-spin text-white" /> : <Sparkles className="w-3.5 h-3.5 text-white" />}
                     {isOrchestrating ? 'Orquestando IA...' : 'Optimizar con IA'}
@@ -340,21 +340,21 @@ export default function ProjectDetailPage() {
                 </form>
               ) : (
                 <div className="space-y-4 animate-fade-in">
-                  <div className="p-4 rounded-xl bg-purple-500/10 border border-purple-500/20">
-                    <h5 className="text-[10px] font-bold text-purple-400 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <div className="p-4 rounded-xl bg-[#0F766E]/5 border border-[#0F766E]/20">
+                    <h5 className="text-[10px] font-bold text-[#0F766E] uppercase tracking-wider mb-2 flex items-center gap-1.5">
                       <Sparkles className="w-3.5 h-3.5" />
                       Así es como hemos orquestado tu IA:
                     </h5>
-                    <p className="text-sm font-medium text-white">
+                    <p className="text-sm font-medium text-slate-900">
                       "{orchestratedData.summary}"
                     </p>
-                    <p className="text-[10px] text-zinc-400 mt-2">
+                    <p className="text-[10px] text-slate-500 mt-2">
                       El prompt técnico completo se ha generado y permanecerá oculto. ¿Estás de acuerdo con esta configuración?
                     </p>
                   </div>
                   
                   {agentError && (
-                    <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+                    <div className="p-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-xs">
                       {agentError}
                     </div>
                   )}
@@ -363,14 +363,14 @@ export default function ProjectDetailPage() {
                     <button
                       onClick={() => setOrchestratedData(null)}
                       disabled={agentLoading}
-                      className="flex-1 py-2.5 px-4 bg-zinc-900 hover:bg-zinc-800 disabled:opacity-50 border border-zinc-800 text-white font-bold rounded-lg text-xs transition-all cursor-pointer"
+                      className="flex-1 py-2.5 px-4 bg-white hover:bg-slate-50 disabled:opacity-50 border border-slate-300 text-slate-700 font-bold rounded-lg text-xs transition-all cursor-pointer"
                     >
                       Editar Instrucciones
                     </button>
                     <button
                       onClick={handleConfirmCreateAgent}
                       disabled={agentLoading}
-                      className="flex-1 py-2.5 px-4 bg-[#00e5ff] hover:bg-[#33ebff] disabled:opacity-50 text-zinc-950 font-bold rounded-lg text-xs transition-all shadow flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="flex-1 py-2.5 px-4 bg-[#0F766E] hover:bg-[#115E59] disabled:opacity-50 text-white font-bold rounded-lg text-xs transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       {agentLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                       Aceptar y Crear Agente
@@ -384,9 +384,9 @@ export default function ProjectDetailPage() {
           {/* List of Agents (Chats de la IA) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
             {agents.length === 0 ? (
-              <div className="col-span-2 text-center py-16 rounded-3xl border border-dashed border-zinc-850 text-zinc-500 text-xs">
-                <div className="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto mb-3">
-                  <MessageSquare className="w-5 h-5 text-zinc-550" />
+              <div className="col-span-2 text-center py-16 rounded-3xl border border-dashed border-slate-300 text-slate-500 bg-white text-xs">
+                <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center mx-auto mb-3">
+                  <MessageSquare className="w-5 h-5 text-slate-400" />
                 </div>
                 No hay chats de la IA creados en este proyecto. Haz clic en "Nuevo Chat de la IA" para dar de alta el primero.
               </div>
@@ -394,36 +394,36 @@ export default function ProjectDetailPage() {
               agents.map((agent) => (
                 <div 
                   key={agent.id}
-                  className="glass rounded-2xl p-5 border border-zinc-850 hover:border-zinc-800 transition-all flex flex-col justify-between group"
+                  className="bg-white rounded-2xl p-5 border border-slate-200 hover:border-[#0F766E]/30 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
                 >
                   <div>
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-zinc-950 border border-[#00e5ff]/15 flex items-center justify-center group-hover:border-[#00e5ff]/25 transition-colors">
-                        <Bot className="w-4 h-4 text-[#00e5ff]" />
+                      <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center group-hover:border-[#0F766E]/30 group-hover:bg-[#0F766E]/5 transition-colors">
+                        <Bot className="w-4 h-4 text-[#0F766E]" />
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold text-white">{agent.name}</h4>
-                        <span className="text-[10px] text-[#00e5ff]/80 font-mono">slug: {agent.slug}</span>
+                        <h4 className="text-xs font-bold text-slate-900">{agent.name}</h4>
+                        <span className="text-[10px] text-[#0F766E]/80 font-mono">slug: {agent.slug}</span>
                       </div>
                     </div>
 
-                    <p className="text-[11px] text-zinc-400 line-clamp-3 leading-relaxed mt-2.5 mb-4 h-12">
+                    <p className="text-[11px] text-slate-500 line-clamp-3 leading-relaxed mt-2.5 mb-4 h-12">
                       {agent.systemInstruction}
                     </p>
                   </div>
 
-                  <div className="flex gap-2 border-t border-zinc-850/50 pt-4 mt-2">
+                  <div className="flex gap-2 border-t border-slate-100 pt-4 mt-2">
                     <Link
                       href={`/dashboard/project/${projectId}/agent/${agent.id}`}
-                      className="flex-1 py-1.5 px-3 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-lg text-xs font-semibold text-center text-white flex items-center justify-center gap-1 transition-all cursor-pointer"
+                      className="flex-1 py-1.5 px-3 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-center text-slate-700 flex items-center justify-center gap-1 transition-all cursor-pointer"
                     >
                       Configurar Chat de la IA
-                      <ArrowRight className="w-3.5 h-3.5 text-zinc-400" />
+                      <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
                     </Link>
 
                     <button
                       onClick={() => handleDeleteAgent(agent.id)}
-                      className="p-2 bg-zinc-950 border border-zinc-850 hover:border-red-500/20 text-zinc-500 hover:text-red-400 rounded-lg transition-all cursor-pointer"
+                      className="p-2 bg-white border border-slate-300 hover:bg-red-50 text-slate-500 hover:text-red-500 hover:border-red-200 rounded-lg transition-all cursor-pointer"
                       title="Eliminar Chat de la IA"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

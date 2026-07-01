@@ -1,49 +1,44 @@
 import React from 'react';
+import { Bot, TrendingUp } from 'lucide-react';
 
 interface LogoProps {
   className?: string;
   size?: number;
+  showText?: boolean;
 }
 
-export default function Logo({ className = '', size = 40 }: LogoProps) {
+export default function Logo({ className = '', size = 40, showText = false }: LogoProps) {
   return (
-    <svg 
-      viewBox="0 0 100 100" 
-      width={size} 
-      height={size} 
-      className={className}
-      style={{ filter: 'drop-shadow(0px 0px 8px rgba(0, 229, 255, 0.35))' }}
-    >
-      {/* Outer Hexagon in Electric Cyan */}
-      <polygon 
-        points="50,8 87,29 87,71 50,92 13,71 13,29" 
-        fill="none" 
-        stroke="#00e5ff" 
-        strokeWidth="6.5" 
-        strokeLinejoin="round" 
-      />
-      {/* Stylized isometric N inside the Hexagon */}
-      {/* Left Vertical Bar (with a slight isometric angle / shape) */}
-      <path 
-        d="M32,32 L32,68" 
-        stroke="#ffffff" 
-        strokeWidth="8" 
-        strokeLinecap="round" 
-      />
-      {/* Right Vertical Bar */}
-      <path 
-        d="M68,32 L68,68" 
-        stroke="#ffffff" 
-        strokeWidth="8" 
-        strokeLinecap="round" 
-      />
-      {/* Diagonal Cyan Connective Bar */}
-      <path 
-        d="M32,34 L68,66" 
-        stroke="#00e5ff" 
-        strokeWidth="9" 
-        strokeLinecap="round" 
-      />
-    </svg>
+    <div className={`flex items-center gap-2 ${className}`}>
+      <div className="relative flex items-center justify-center">
+        {/* Navy circle border */}
+        <div 
+          className="absolute rounded-full border-2 border-[#1e3a8a] flex items-center justify-center"
+          style={{ width: size, height: size }}
+        >
+          {/* Green accent arc */}
+          <div className="absolute w-full h-full rounded-full border-2 border-transparent border-t-[#0ea5e9] border-r-[#10b981] rotate-45" />
+        </div>
+        
+        {/* Robot inside */}
+        <Bot 
+          size={size * 0.55} 
+          className="text-[#1e3a8a] relative z-10" 
+          strokeWidth={2.5}
+        />
+        
+        {/* Trending up small icon */}
+        <div className="absolute -bottom-1 -right-2 bg-white rounded-full p-0.5 shadow-sm">
+          <TrendingUp size={size * 0.35} className="text-[#10b981]" strokeWidth={3} />
+        </div>
+      </div>
+      
+      {showText && (
+        <div className="font-extrabold tracking-tight" style={{ fontSize: size * 0.8 }}>
+          <span className="text-[#1e3a8a]">Orch</span>
+          <span className="text-[#10b981]">aix</span>
+        </div>
+      )}
+    </div>
   );
 }
