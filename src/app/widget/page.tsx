@@ -115,20 +115,20 @@ function WidgetChatContent() {
 
   if (loading) {
     return (
-      <div className="w-full h-screen bg-[#18181b] flex items-center justify-center border border-zinc-800 rounded-2xl overflow-hidden">
-        <Loader2 className="w-8 h-8 text-[#00e5ff] animate-spin" />
+      <div className="w-full h-screen bg-white flex items-center justify-center border border-slate-200 rounded-2xl overflow-hidden shadow-md">
+        <Loader2 className="w-8 h-8 text-[#0F766E] animate-spin" />
       </div>
     );
   }
 
   if (error || !agent) {
     return (
-      <div className="w-full h-screen bg-[#18181b] flex items-center justify-center p-4 border border-zinc-800 rounded-2xl text-center">
+      <div className="w-full h-screen bg-white flex items-center justify-center p-4 border border-slate-200 rounded-2xl text-center shadow-md">
         <div>
-          <p className="text-red-400 text-xs mb-2">⚠️ {error}</p>
+          <p className="text-red-600 text-xs mb-2">⚠️ {error}</p>
           <button 
             onClick={() => window.location.reload()}
-            className="py-1 px-3 bg-zinc-900 border border-zinc-800 text-[10px] text-white rounded cursor-pointer"
+            className="py-1.5 px-3 bg-slate-50 border border-slate-200 hover:bg-slate-100 text-[10px] text-slate-700 font-semibold rounded cursor-pointer transition-colors"
           >
             Reintentar
           </button>
@@ -138,28 +138,28 @@ function WidgetChatContent() {
   }
 
   return (
-    <div className="w-full h-screen bg-[#18181b] text-white flex flex-col border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl">
+    <div className="w-full h-screen bg-white text-slate-900 flex flex-col border border-slate-200 rounded-2xl overflow-hidden shadow-2xl">
       {/* Header Widget */}
-      <header className="px-4 py-3 border-b border-zinc-800 bg-[#18181b] flex items-center gap-2">
-        <Logo size={24} />
+      <header className="px-4 py-3 border-b border-slate-100 bg-white flex items-center gap-2 shadow-sm z-10">
+        <Logo size={24} showText={false} />
         <div className="flex-1 min-w-0">
-          <h1 className="text-xs font-bold text-white leading-tight truncate">{agent.name}</h1>
-          <p className="text-[9px] text-zinc-500 truncate">Proyecto: {agent.projectName}</p>
+          <h1 className="text-xs font-bold text-slate-900 leading-tight truncate">{agent.name}</h1>
+          <p className="text-[9px] text-slate-500 truncate">Proyecto: {agent.projectName}</p>
         </div>
       </header>
 
       {/* Messages */}
-      <main className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin">
+      <main className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin bg-white">
         {messages.map((msg, index) => (
           <div 
             key={index}
             className={`flex flex-col max-w-[85%] ${msg.sender === 'user' ? 'ml-auto items-end' : 'mr-auto items-start'}`}
           >
             <div 
-              className={`p-2.5 rounded-xl text-xs leading-normal whitespace-pre-wrap ${
+              className={`p-2.5 rounded-xl text-xs leading-normal whitespace-pre-wrap shadow-sm ${
                 msg.sender === 'user' 
-                  ? 'bg-indigo-600 text-white rounded-tr-none' 
-                  : 'bg-zinc-900 text-zinc-200 border border-zinc-800/80 rounded-tl-none'
+                  ? 'bg-[#0F766E] text-white rounded-tr-none' 
+                  : 'bg-slate-50 text-slate-700 border border-slate-200 rounded-tl-none'
               }`}
             >
               {msg.content}
@@ -169,8 +169,8 @@ function WidgetChatContent() {
 
         {chatLoading && (
           <div className="flex flex-col max-w-[80%] mr-auto items-start">
-            <div className="p-2.5 rounded-xl bg-zinc-900 text-zinc-400 border border-zinc-800 rounded-tl-none flex items-center gap-1.5">
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-[#00e5ff]" />
+            <div className="p-2.5 rounded-xl bg-slate-50 text-slate-500 border border-slate-200 rounded-tl-none flex items-center gap-1.5 shadow-sm">
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0F766E]" />
               <span className="text-[11px]">Escribiendo...</span>
             </div>
           </div>
@@ -180,7 +180,7 @@ function WidgetChatContent() {
       </main>
 
       {/* Input */}
-      <footer className="p-3 border-t border-zinc-800 bg-[#18181b]">
+      <footer className="p-3 border-t border-slate-200 bg-slate-50">
         <form onSubmit={handleSendMessage} className="flex gap-2">
           <input
             type="text"
@@ -188,14 +188,14 @@ function WidgetChatContent() {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             disabled={chatLoading}
-            className="flex-1 px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-[#00e5ff]/50 transition-all text-xs"
+            className="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-xs shadow-sm"
           />
           <button
             type="submit"
             disabled={chatLoading || !inputValue.trim()}
-            className="p-2 bg-[#00e5ff] hover:bg-[#33ebff] disabled:bg-[#00e5ff]/40 rounded-lg text-zinc-950 transition-all cursor-pointer flex items-center justify-center"
+            className="p-2 bg-[#0F766E] hover:bg-[#115E59] disabled:opacity-50 rounded-lg text-white transition-all cursor-pointer flex items-center justify-center shadow-sm"
           >
-            <Send className="w-3.5 h-3.5 text-zinc-950" />
+            <Send className="w-3.5 h-3.5 text-white" />
           </button>
         </form>
       </footer>
@@ -206,8 +206,8 @@ function WidgetChatContent() {
 export default function WidgetChatPage() {
   return (
     <Suspense fallback={
-      <div className="w-full h-screen bg-[#18181b] flex items-center justify-center border border-zinc-800 rounded-2xl overflow-hidden">
-        <Loader2 className="w-8 h-8 text-[#00e5ff] animate-spin" />
+      <div className="w-full h-screen bg-white flex items-center justify-center border border-slate-200 rounded-2xl overflow-hidden shadow-md">
+        <Loader2 className="w-8 h-8 text-[#0F766E] animate-spin" />
       </div>
     }>
       <WidgetChatContent />
