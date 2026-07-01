@@ -1,100 +1,69 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/lucide-icons/lucide/main/icons/bot.svg" width="80" alt="Orchaix Logo" />
   <h1>Orchaix</h1>
-  <p><strong>La Plataforma de Inteligencia Artificial Multi-Agente No-Code Definitiva para Comercios</strong></p>
+  <p><strong>La Plataforma SaaS donde cualquier PYME crea y despliega un agente de IA en menos de 2 minutos.</strong></p>
+  <p><i>🌟 Proyecto participante en ElevateU - VCILAT 2026 🌟</i></p>
 </div>
 
 ---
 
-## 🚀 ¿Qué es Orchaix?
-
-**Orchaix** democratiza el acceso a la Inteligencia Artificial para pequeños y medianos comercios. A través de una plataforma 100% No-Code, cualquier negocio puede crear múltiples asistentes de IA expertos (Agentes), proveerles la información específica de su negocio y distribuirlos a través de múltiples canales (Web, Móvil, Escritorio, Widgets y Telegram).
-
-La IA deja de ser una herramienta genérica y se convierte en tu **vendedor experto, tu equipo de soporte o tu recepcionista las 24/7**, todo operando bajo las directivas exactas de tu comercio.
+> *"Mientras el mundo tiene n8n para developers, nosotros somos el ChatGPT para el emprendedor latinoamericano que solo quiere que su negocio funcione con IA."*
 
 ---
 
-## ✨ Características Principales (Hackathon Highlights)
+## 🎯 1. Propuesta de Valor (El Problema y la Solución)
 
-* 🤖 **Arquitectura Multi-Agente por Proyecto:** Crea múltiples "Chats de la IA" especializados para tu negocio. (Ej: un agente exclusivo para Ventas y otro para Soporte Técnico).
-* 📚 **RAG (Retrieval-Augmented Generation) Integrado:** Los comercios pueden subir sus propios datos (catálogos, precios, horarios, FAQs). La IA de Google Gemini asimila estos datos y responde *exclusivamente* basándose en ellos, eliminando alucinaciones.
-* 🌐 **Distribución Omnicanal (Build Once, Deploy Everywhere):**
-  * **Link Público Directo:** Páginas alojadas para acceso rápido (`orchaix.com/pe/usuario/proyecto/chat`).
-  * **SDK Web Widget:** Código inyectable de una línea para tener una burbuja flotante de soporte en cualquier página externa.
-  * **Telegram Bot Automatizado:** Vincula el token de Telegram y Orchaix tomará control del bot de forma automática para responder a los clientes.
-* 📱 **Ecosistema Completo de Aplicaciones:**
-  * **Web App (Dashboard):** Gestión completa de agentes, conocimiento y métricas.
-  * **Mobile App (iOS/Android - Expo):** 
-    * *Modo Comercio:* Para gestionar a los agentes desde cualquier lugar.
-    * *Modo Cliente:* Con un sistema estilo "Discord", los usuarios introducen el código de acceso del chat para hablar directamente con el negocio.
-  * **Desktop App (Electron):** Gestión ininterrumpida y nativa en Windows/macOS/Linux.
+Las PYMEs necesitan automatización con IA, pero las herramientas actuales (n8n, Make, Botpress) son exclusivas para equipos técnicos: requieren configurar nodos, manejar APIs, saber inglés y pagar costosas licencias por separado. 
 
----
+**La Solución: Orchaix**
+Orchaix es una plataforma **100% No-Code**. El usuario simplemente escribe en lenguaje natural qué quiere lograr (Ej: "Quiero vender zapatos por WhatsApp"). Nuestro **Orquestador A2A (Agent-to-Agent)** interno traduce mágicamente esa idea en un System Prompt profesional, configura la IA y la despliega instantáneamente en Widgets, Telegram o WhatsApp. Todo en menos de 2 minutos.
 
-## 🛠️ Stack Tecnológico
+## 🚀 2. Potencial de Mercado y Escalabilidad
 
-Orchaix está construido pensando en escalabilidad y rendimiento:
+Orchaix nace como un modelo B2B SaaS altamente escalable enfocado en la adopción masiva:
+* **TAM (Total Addressable Market):** Mercado global de agentes de IA proyectado en +$47 mil millones para 2030.
+* **SAM (Serviceable Available Market):** +25 millones de PYMEs en Latinoamérica que hoy no tienen acceso real a IA por barreras técnicas.
+* **Modelo de Negocio (Wallet / Pay-as-you-go):** El cliente recarga saldo (pre-pago). Orchaix absorbe la complejidad de las API Keys. Se cobra una fracción de centavo por mensaje generado, asegurando rentabilidad desde el día 1 sin fricción de suscripciones fijas internacionales.
 
-* **IA Engine:** Google Gemini SDK (`@google/genai`).
-* **Web Frontend / Backend:** Next.js (App Router), React, TailwindCSS, TypeScript.
-* **Base de Datos:** PostgreSQL alojado en [Neon](https://neon.tech), ORM con [Prisma](https://www.prisma.io/).
-* **Móvil:** React Native / Expo.
-* **Escritorio:** Electron.js.
+## ⚙️ 3. Validación Inicial y Estado del MVP (Prototipo Funcional)
 
----
+Orchaix ya se encuentra en fase de **Producto Mínimo Viable (MVP) Funcional**.
+* **Frontend Omnicanal:** Dashboard Web (Next.js), App Móvil para gestión (React Native/Expo) y App de Escritorio (Electron).
+* **Core Tecnológico:** Integración probada con Google Gemini (1.5 Flash) para máxima velocidad y bajo costo.
+* **Arquitectura RAG:** Los usuarios ya pueden subir los datos de su negocio (precios, reglas) para que la IA responda sin alucinar.
+* **Despliegue Inmediato:** Generación de links públicos directos y conexión nativa con bots de Telegram.
 
-## 🏁 Cómo iniciar localmente (Quickstart)
-
-### 1. Requisitos Previos
-* Node.js v18+
-* Una base de datos de Postgres (recomendado Neon).
-* Un API Key de Google Gemini.
-
-### 2. Configurar el Backend / Web Dashboard
-1. Clona el repositorio e instala dependencias:
-   ```bash
-   git clone https://github.com/nadevrix/orchaix.git
-   cd orchaix
-   npm install
-   ```
-2. Configura tus variables de entorno creando un archivo `.env`:
-   ```env
-   DATABASE_URL="postgres://usuario:password@host/orchaix?sslmode=require"
-   GEMINI_API_KEY="tu-api-key-de-gemini"
-   JWT_SECRET="tu-secreto-super-seguro"
-   ```
-3. Empuja el esquema a tu base de datos:
-   ```bash
-   npx prisma db push
-   ```
-4. Inicia el servidor de desarrollo:
-   ```bash
-   npm run dev
-   ```
-
-### 3. Iniciar la Aplicación Móvil
-1. Ve al directorio `/mobile`.
-2. Instala las dependencias y ejecuta Expo:
-   ```bash
-   cd mobile
-   npm install
-   npx expo start
-   ```
-
-### 4. Iniciar la Aplicación de Escritorio
-1. Ve al directorio `/desktop`.
-2. Instala dependencias y corre Electron:
-   ```bash
-   cd desktop
-   npm install
-   npm start
-   ```
+## 🧠 4. Diferenciador Tecnológico: El Orquestador A2A
+La verdadera innovación no es conectar una IA, es **orquestarla**.
+El usuario no interactúa con parámetros técnicos. Al escribir sus instrucciones, un "Agente Orquestador" analiza el *intent*, elige la mejor plantilla y configura al "Agente de Acción". El resultado es un asistente de ventas o soporte altamente calibrado, generado de forma completamente invisible para el usuario final.
 
 ---
 
-## 💡 Modelo de Seguridad e Integración
-El flujo comercial de Orchaix garantiza que **las claves de IA nunca se exponen al cliente**. Toda la orquestación ocurre en el Backend de la plataforma. El comercio solo comparte un enlace, un widget o un bot, garantizando seguridad absoluta mientras atiende de forma inteligente a miles de clientes en paralelo.
+## 🏁 Cómo Probar el MVP Localmente
 
+### 1. Configurar el Backend / Web Dashboard
+```bash
+git clone https://github.com/nadevrix/orchaix.git
+cd orchaix
+npm install
+```
+Configura el archivo `.env`:
+```env
+DATABASE_URL="postgres://usuario:password@host/orchaix?sslmode=require"
+GEMINI_API_KEY="tu-api-key-de-gemini"
+JWT_SECRET="tu-secreto-super-seguro"
+```
+Inicia la base de datos y el servidor:
+```bash
+npx prisma db push
+npm run dev
+```
+
+### 2. Ecosistema Adicional
+* **App Móvil:** `cd mobile && npm install && npx expo start`
+* **App de Escritorio:** `cd desktop && npm install && npm start`
+
+---
 <div align="center">
-  <i>Construido con pasión para potenciar los pequeños negocios a través de la IA.</i>
+  <i>Construido con pasión por la Next Gen of Founders para transformar la economía de LATAM.</i>
 </div>
