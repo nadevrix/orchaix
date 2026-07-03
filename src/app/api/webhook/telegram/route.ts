@@ -61,11 +61,13 @@ export async function POST(req: Request) {
     }
 
     // 4. Retrieve recent history (last 20 messages)
-    const dbMessages = await prisma.message.findMany({
-      where: { chatSessionId: session.id },
-      orderBy: { createdAt: 'asc' },
-      take: 20,
-    });
+    const dbMessages = (
+      await prisma.message.findMany({
+        where: { chatSessionId: session.id },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+      })
+    ).reverse();
 
     const chatHistory = dbMessages.map((msg) => ({
       sender: msg.sender,
@@ -128,6 +130,6 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error('Error general en Webhook de Telegram:', error);
     // Always return 200 OK to Telegram webhooks so they don't block the endpoint
-    return NextResponse.json({ ok: true, error: error.message });
+    return NextResponse.json({ ok: true });
   }
 }

@@ -49,6 +49,7 @@ model Agent {
   createdAt         DateTime      @default(now())
 
   @@unique([projectId, slug])
+  @@index([telegramToken])
 }
 
 // Documentos/Datos de entrenamiento del chat de la IA (RAG)
@@ -71,6 +72,8 @@ model ChatSession {
   platform         String    // "web" | "mobile" | "telegram" | "sdk"
   messages         Message[]
   createdAt        DateTime  @default(now())
+
+  @@index([agentId, clientIdentifier, platform])
 }
 
 // Historial de mensajes individuales
@@ -81,5 +84,7 @@ model Message {
   sender        String      // "user" | "ai"
   content       String      @db.Text
   createdAt     DateTime    @db.Timestamp @default(now())
+
+  @@index([chatSessionId, createdAt])
 }
 

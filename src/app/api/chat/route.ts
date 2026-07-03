@@ -14,9 +14,16 @@ export async function POST(req: Request) {
       );
     }
 
-    if (message.trim() === '') {
+    if (typeof message !== 'string' || message.trim() === '') {
       return NextResponse.json(
         { error: 'El mensaje no puede estar vacío' },
+        { status: 400 }
+      );
+    }
+
+    if (message.length > 4000) {
+      return NextResponse.json(
+        { error: 'El mensaje supera el límite de 4000 caracteres' },
         { status: 400 }
       );
     }
@@ -56,11 +63,13 @@ export async function POST(req: Request) {
     }
 
     // 3. Retrieve recent history (last 20 messages) to keep context light
-    const dbMessages = await prisma.message.findMany({
-      where: { chatSessionId: session.id },
-      orderBy: { createdAt: 'asc' },
-      take: 20,
-    });
+    const dbMessages = (
+      await prisma.message.findMany({
+        where: { chatSessionId: session.id },
+        orderBy: { createdAt: 'desc' },
+        take: 20,
+      })
+    ).reverse();
 
     // Format database messages to match Gemini's expectations (sender: "user" | "ai")
     const chatHistory = dbMessages.map((msg) => ({
@@ -102,10 +111,10 @@ export async function POST(req: Request) {
       response: aiResponse,
       sessionId: session.id,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error in chat API:', error);
     return NextResponse.json(
-      { error: error.message || 'Error interno al procesar el mensaje' },
+      { error: 'Error interno al procesar el mensaje' },
       { status: 500 }
     );
   }

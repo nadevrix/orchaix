@@ -70,10 +70,10 @@ No incluyas markdown como \`\`\`json, devuelve únicamente el JSON directo.
       prompt: result.prompt,
       summary: result.summary,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error in orchestrate API:', error);
     return NextResponse.json(
-      { error: 'Error interno al orquestar: ' + (error.message || '') },
+      { error: 'Error interno al orquestar la instrucción. Inténtalo de nuevo.' },
       { status: 500 }
     );
   }

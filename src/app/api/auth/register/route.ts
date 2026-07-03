@@ -17,6 +17,14 @@ export async function POST(req: Request) {
       );
     }
 
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (typeof email !== 'string' || !emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: 'El correo electrónico no tiene un formato válido' },
+        { status: 400 }
+      );
+    }
+
     if (password.length < 6) {
       return NextResponse.json(
         { error: 'La contraseña debe tener al menos 6 caracteres' },
@@ -117,6 +125,13 @@ export async function POST(req: Request) {
       },
     });
   } catch (error: any) {
+    // Unique constraint violated (registro concurrente con mismo email/username)
+    if (error?.code === 'P2002') {
+      return NextResponse.json(
+        { error: 'El correo o nombre de usuario ya está registrado' },
+        { status: 400 }
+      );
+    }
     console.error('Error in register:', error);
     return NextResponse.json(
       { error: 'Ocurrió un error al procesar el registro' },
