@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getRelevantContext, askGemini } from '@/lib/gemini';
+import { checkRateLimit } from '@/lib/rate-limit';
+import { isWithinDailyLimit, recordUsage } from '@/lib/usage';
+
+// Máximo de mensajes por minuto por chat de Telegram
+const RATE_LIMIT_PER_MINUTE = 15;
 
 export async function POST(req: Request) {
   try {
@@ -27,16 +32,29 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true });
     }
 
+    // 1b. Rate limit por chat de Telegram (las peticiones vienen de Telegram,
+    // así que la IP no identifica al usuario final)
+    const rate = checkRateLimit(`tg:${chatId}`, RATE_LIMIT_PER_MINUTE);
+    if (!rate.allowed) {
+      return NextResponse.json({ ok: true });
+    }
+
     // 2. Find the agent registered with this telegram bot token
     const agent = await prisma.agent.findFirst({
       where: { telegramToken: token },
       include: {
         documents: true,
+        project: { select: { merchantId: true } },
       },
     });
 
     if (!agent) {
       console.error(`Ningún agente registrado con el token de Telegram: ${token}`);
+      return NextResponse.json({ ok: true });
+    }
+
+    // 2b. Tope diario persistente por agente (control de costos)
+    if (!(await isWithinDailyLimit(agent.id))) {
       return NextResponse.json({ ok: true });
     }
 
@@ -108,6 +126,9 @@ export async function POST(req: Request) {
         },
       }),
     ]);
+
+    // 7b. Register consumption in the merchant's daily usage counter
+    await recordUsage(agent.id, agent.project.merchantId);
 
     // 8. Reply back to Telegram
     const telegramUrl = `https://api.telegram.org/bot${token}/sendMessage`;

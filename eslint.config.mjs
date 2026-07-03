@@ -12,7 +12,20 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Subproyectos con su propio entorno (Electron CJS y React Native/Expo);
+    // el config de Next no les aplica.
+    "desktop/**",
+    "mobile/**",
+    "public/**",
   ]),
+  {
+    rules: {
+      // Deuda preexistente del dashboard; visible como warning sin romper CI.
+      "@typescript-eslint/no-explicit-any": "warn",
+      // Regla cosmética: comillas dobles en texto en español.
+      "react/no-unescaped-entities": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

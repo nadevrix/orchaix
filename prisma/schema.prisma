@@ -88,3 +88,17 @@ model Message {
   @@index([chatSessionId, createdAt])
 }
 
+// Consumo diario de mensajes por agente. Base para límites de uso y
+// facturación pay-as-you-go. Sin FK a Agent a propósito: el historial de
+// consumo debe sobrevivir si el comercio elimina el agente.
+model DailyUsage {
+  id         String   @id @default(uuid())
+  merchantId String
+  agentId    String
+  date       DateTime @db.Date
+  messages   Int      @default(0)
+
+  @@unique([agentId, date])
+  @@index([merchantId, date])
+}
+

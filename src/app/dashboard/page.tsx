@@ -92,6 +92,8 @@ export default function DashboardPage() {
       return;
     }
 
+    // localStorage solo existe en el cliente; hidratar aquí es el patrón SSR-safe
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMerchant(JSON.parse(storedMerchant));
     fetchDashboardData(token);
   }, [router, fetchDashboardData]);

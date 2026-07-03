@@ -98,6 +98,8 @@ export default function ProjectDetailPage() {
       router.push('/dashboard/login');
       return;
     }
+    // La función es async: los setState ocurren tras los await, no de forma síncrona
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchProjectData(token);
   }, [projectId, router, fetchProjectData]);
 

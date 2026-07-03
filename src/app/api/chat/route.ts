@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getRelevantContext, askGemini } from '@/lib/gemini';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
+import { isWithinDailyLimit, recordUsage } from '@/lib/usage';
+
+// Máximo de mensajes por minuto por IP hacia un mismo agente
+const RATE_LIMIT_PER_MINUTE = 20;
 
 export async function POST(req: Request) {
   try {
@@ -28,11 +33,21 @@ export async function POST(req: Request) {
       );
     }
 
+    // 0. Rate limit por IP + agente (primera barrera, en memoria)
+    const rate = checkRateLimit(`chat:${getClientIp(req)}:${agentId}`, RATE_LIMIT_PER_MINUTE);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: 'Demasiados mensajes en poco tiempo. Espera un momento e inténtalo de nuevo.' },
+        { status: 429, headers: { 'Retry-After': String(rate.retryAfterSeconds) } }
+      );
+    }
+
     // 1. Fetch agent along with its own training documents
     const agent = await prisma.agent.findUnique({
       where: { id: agentId },
       include: {
         documents: true,
+        project: { select: { merchantId: true } },
       },
     });
 
@@ -40,6 +55,14 @@ export async function POST(req: Request) {
       return NextResponse.json(
         { error: 'El agente especificado no existe' },
         { status: 404 }
+      );
+    }
+
+    // 1b. Tope diario persistente por agente (control de costos)
+    if (!(await isWithinDailyLimit(agent.id))) {
+      return NextResponse.json(
+        { error: 'Este asistente alcanzó su límite diario de mensajes. Inténtalo mañana.' },
+        { status: 429 }
       );
     }
 
@@ -105,6 +128,9 @@ export async function POST(req: Request) {
         },
       }),
     ]);
+
+    // 7. Register consumption in the merchant's daily usage counter
+    await recordUsage(agent.id, agent.project.merchantId);
 
     // Return the response and session ID
     return NextResponse.json({
