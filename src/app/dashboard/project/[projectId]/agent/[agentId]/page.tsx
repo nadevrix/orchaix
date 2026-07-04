@@ -1,12 +1,15 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter as useAppRouter, useParams as useAppParams } from 'next/navigation';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
-import { 
-  ArrowLeft, Settings, Code, Send, Loader2, Sparkles, Check, Copy, RefreshCw, MessageSquare, HelpCircle, FileText, Plus, Trash2
+import {
+  ArrowLeft, Settings, Code, Send, Loader2, Sparkles, Check, Copy, RefreshCw, MessageSquare, HelpCircle, FileText, Plus, Trash2, Upload
 } from 'lucide-react';
+
+const UPLOAD_EXTENSIONS = ['pdf', 'docx', 'txt', 'md', 'csv'];
+const UPLOAD_MAX_BYTES = 4 * 1024 * 1024;
 
 interface Document {
   id: string;
@@ -58,6 +61,13 @@ export default function AgentDetailPage() {
   const [docContent, setDocContent] = useState('');
   const [docLoading, setDocLoading] = useState(false);
   const [docError, setDocError] = useState('');
+
+  // File upload State (RAG)
+  const [fileUploading, setFileUploading] = useState(false);
+  const [fileError, setFileError] = useState('');
+  const [fileSuccess, setFileSuccess] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Chat Playground State
   const [messages, setMessages] = useState<{ sender: 'user' | 'ai'; content: string }[]>([
@@ -242,6 +252,62 @@ export default function AgentDetailPage() {
     } finally {
       setDocLoading(false);
     }
+  };
+
+  // Upload Document File (RAG)
+  const handleFileUpload = async (file: File) => {
+    setFileError('');
+    setFileSuccess('');
+
+    const extension = file.name.slice(file.name.lastIndexOf('.') + 1).toLowerCase();
+    if (!UPLOAD_EXTENSIONS.includes(extension)) {
+      setFileError(`Formato no soportado. Sube un archivo ${UPLOAD_EXTENSIONS.map((e) => '.' + e).join(', ')}`);
+      return;
+    }
+
+    if (file.size > UPLOAD_MAX_BYTES) {
+      setFileError('El archivo supera el tamaño máximo de 4MB.');
+      return;
+    }
+
+    const token = localStorage.getItem('merchant_token');
+    if (!token) return;
+
+    setFileUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch(`/api/projects/${projectId}/agents/${agentId}/documents`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'No se pudo procesar el archivo');
+      }
+
+      setDocuments((prev) => [data.document, ...prev]);
+      setFileSuccess(`"${file.name}" cargado correctamente. La IA ya puede consultar su contenido.`);
+      setTimeout(() => setFileSuccess(''), 5000);
+    } catch (err: any) {
+      setFileError(err.message || 'Error de conexión al subir el archivo');
+    } finally {
+      setFileUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (fileUploading) return;
+    const file = e.dataTransfer.files?.[0];
+    if (file) handleFileUpload(file);
   };
 
   // Delete Document (RAG)
@@ -540,10 +606,75 @@ export default function AgentDetailPage() {
             {/* TAB 2: TRAINING DOCUMENTS (RAG) */}
             {activeTab === 'training' && (
               <div className="space-y-8 animate-fade-in">
+                {/* Upload de archivos */}
+                <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+                  <h3 className="text-base font-bold text-slate-900 mb-1 flex items-center gap-2">
+                    <Upload className="w-4 h-4 text-[#0F766E]" />
+                    Subir Documento
+                  </h3>
+                  <p className="text-xs text-slate-500 mb-4">
+                    Sube catálogos, listas de precios o políticas en PDF, Word, TXT, Markdown o CSV. El texto se extrae automáticamente y la IA lo usará para responder.
+                  </p>
+
+                  {fileError && (
+                    <div className="p-3 mb-3 rounded-lg bg-red-50 border border-red-100 text-red-600 text-xs">
+                      {fileError}
+                    </div>
+                  )}
+
+                  {fileSuccess && (
+                    <div className="p-3 mb-3 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-600 text-xs flex items-center gap-1.5">
+                      <Check className="w-4 h-4 shrink-0" />
+                      {fileSuccess}
+                    </div>
+                  )}
+
+                  <div
+                    onClick={() => !fileUploading && fileInputRef.current?.click()}
+                    onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                    onDragLeave={() => setIsDragging(false)}
+                    onDrop={handleDrop}
+                    className={`rounded-xl border-2 border-dashed p-8 text-center transition-all cursor-pointer ${
+                      isDragging
+                        ? 'border-[#0F766E] bg-[#0F766E]/5'
+                        : 'border-slate-300 bg-slate-50 hover:border-[#0F766E]/50 hover:bg-[#0F766E]/5'
+                    } ${fileUploading ? 'opacity-60 pointer-events-none' : ''}`}
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept=".pdf,.docx,.txt,.md,.csv"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFileUpload(file);
+                      }}
+                    />
+
+                    {fileUploading ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <Loader2 className="w-8 h-8 text-[#0F766E] animate-spin" />
+                        <p className="text-xs font-semibold text-slate-700">Extrayendo texto del documento...</p>
+                        <p className="text-[10px] text-slate-500">Esto puede tardar unos segundos con archivos grandes.</p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2">
+                        <Upload className="w-8 h-8 text-slate-400" />
+                        <p className="text-xs font-semibold text-slate-700">
+                          Arrastra un archivo aquí o haz clic para seleccionarlo
+                        </p>
+                        <p className="text-[10px] text-slate-500">
+                          PDF, DOCX, TXT, MD o CSV · Máximo 4MB
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
                 <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm relative overflow-hidden">
                   <h3 className="text-base font-bold text-slate-900 mb-1 flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-[#0F766E]" />
-                    Cargar Datos para este Chat de la IA
+                    Cargar Datos Manualmente
                   </h3>
                   <p className="text-xs text-slate-500 mb-4">
                     Agrega catálogos de precios, FAQs o políticas específicas para este Chat de la IA. Este asistente interactuará con el usuario basándose únicamente en esta información.
@@ -612,7 +743,15 @@ export default function AgentDetailPage() {
                           className="bg-white rounded-xl p-4 flex justify-between items-start gap-4 border border-slate-200 hover:border-[#0F766E]/30 shadow-sm transition-all"
                         >
                           <div className="flex-1 min-w-0">
-                            <h4 className="text-xs font-bold text-slate-900 truncate">{doc.title}</h4>
+                            <div className="flex items-center gap-2">
+                              <h4 className="text-xs font-bold text-slate-900 truncate">{doc.title}</h4>
+                              {doc.sourceType === 'file' && (
+                                <span className="shrink-0 inline-flex items-center gap-1 text-[9px] font-semibold text-[#0F766E] bg-[#0F766E]/5 border border-[#0F766E]/10 px-1.5 py-0.5 rounded uppercase tracking-wider">
+                                  <FileText className="w-2.5 h-2.5" />
+                                  Archivo
+                                </span>
+                              )}
+                            </div>
                             <p className="text-[11px] text-slate-500 mt-1 line-clamp-3 leading-relaxed whitespace-pre-line">
                               {doc.content}
                             </p>
