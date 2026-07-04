@@ -7,6 +7,7 @@ import Logo from '@/components/Logo';
 import Skeleton from '@/components/Skeleton';
 import AgentAvatar from '@/components/AgentAvatar';
 import TypingIndicator from '@/components/TypingIndicator';
+import MarkdownMessage from '@/components/MarkdownMessage';
 import {
   ArrowLeft, Settings, Code, Send, Loader2, Sparkles, Check, Copy, RefreshCw, MessageSquare, HelpCircle, FileText, Plus, Trash2, Upload
 } from 'lucide-react';
@@ -945,7 +946,7 @@ export default function AgentDetailPage() {
                         : 'bg-slate-50 text-slate-700 border border-slate-200 rounded-tl-none'
                     }`}
                   >
-                    {msg.content}
+                    {msg.sender === 'ai' ? <MarkdownMessage content={msg.content} /> : msg.content}
                   </div>
                 </div>
               </div>

@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Logo from '@/components/Logo';
 import AgentAvatar from '@/components/AgentAvatar';
 import TypingIndicator from '@/components/TypingIndicator';
+import MarkdownMessage from '@/components/MarkdownMessage';
 import { Send, Loader2 } from 'lucide-react';
 
 interface Agent {
@@ -166,7 +167,7 @@ function WidgetChatContent() {
                   : 'bg-slate-50 text-slate-700 border border-slate-200 rounded-tl-none'
               }`}
             >
-              {msg.content}
+              {msg.sender === 'ai' ? <MarkdownMessage content={msg.content} /> : msg.content}
             </div>
           </div>
         ))}
