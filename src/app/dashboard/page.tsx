@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
 import Skeleton from '@/components/Skeleton';
+import UsagePanel from '@/components/UsagePanel';
 import {
   Plus, Folder, PlusCircle, Bot,
   FileText, LogOut, Loader2, ArrowRight, User
@@ -174,6 +175,7 @@ export default function DashboardPage() {
               <Skeleton key={i} className="h-28 rounded-2xl" />
             ))}
           </div>
+          <Skeleton className="h-64 rounded-2xl mb-10" />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[0, 1, 2].map((i) => (
               <Skeleton key={i} className="h-52 rounded-2xl" />
@@ -257,6 +259,9 @@ export default function DashboardPage() {
             </span>
           </div>
         </div>
+
+        {/* Usage Panel (mensajes últimos 30 días) */}
+        <UsagePanel />
 
         {/* Projects Grid */}
         {projects.length === 0 ? (
