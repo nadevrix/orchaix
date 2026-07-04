@@ -4,8 +4,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
-import { 
-  ArrowLeft, Bot, Plus, Loader2, Sparkles, Trash2, ArrowRight, Check, AlertCircle, MessageSquare
+import Skeleton from '@/components/Skeleton';
+import {
+  ArrowLeft, Bot, Plus, Loader2, Sparkles, Trash2, ArrowRight, Check, MessageSquare
 } from 'lucide-react';
 
 interface Agent {
@@ -205,10 +206,29 @@ export default function ProjectDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-10 h-10 text-[#0F766E] animate-spin" />
-          <p className="text-slate-500 text-sm">Cargando proyecto...</p>
+      <div className="min-h-screen bg-slate-50">
+        <nav className="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-40">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex h-16 items-center gap-4">
+              <Skeleton className="w-8 h-8 rounded-lg" />
+              <Logo size={28} showText={false} />
+              <Skeleton className="h-5 w-40" />
+            </div>
+          </div>
+        </nav>
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-slate-200 pb-6 mb-6">
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-4 w-96 max-w-full" />
+            </div>
+            <Skeleton className="h-10 w-44 rounded-xl" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[0, 1].map((i) => (
+              <Skeleton key={i} className="h-44 rounded-2xl" />
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -244,7 +264,7 @@ export default function ProjectDetailPage() {
           <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-slate-200 pb-6">
             <div>
               <h1 className="text-2xl font-extrabold text-slate-900">Chats de la IA</h1>
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-sm text-slate-500 mt-1">
                 Administra los chats de la IA independientes de este proyecto. Cada chat puede tener su personalidad, sus propios datos y su URL única.
               </p>
             </div>
@@ -252,7 +272,7 @@ export default function ProjectDetailPage() {
             {!showCreateForm && (
               <button
                 onClick={() => setShowCreateForm(true)}
-                className="py-2.5 px-4 bg-[#0F766E] hover:bg-[#115E59] text-white font-bold rounded-xl text-xs transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer self-start sm:self-auto"
+                className="py-3 px-5 bg-[#0F766E] hover:bg-[#115E59] text-white font-bold rounded-xl text-sm transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-1.5 cursor-pointer self-start sm:self-auto"
               >
                 <Plus className="w-4 h-4" />
                 Nuevo Chat de la IA
@@ -286,7 +306,7 @@ export default function ProjectDetailPage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
+                      <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
                         Nombre del Chat de la IA
                       </label>
                       <input
@@ -295,12 +315,12 @@ export default function ProjectDetailPage() {
                         placeholder="Ej: Asistente Ventas, Soporte Tecnico"
                         value={agentName}
                         onChange={(e) => handleAgentNameChange(e.target.value)}
-                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-xs"
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-sm"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
+                      <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
                         Slug URL del Chat de la IA
                       </label>
                       <input
@@ -309,13 +329,13 @@ export default function ProjectDetailPage() {
                         placeholder="Ej: ventas, soporte"
                         value={agentSlug}
                         onChange={(e) => setAgentSlug(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
-                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-xs font-mono"
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-sm font-mono"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
+                    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
                       Instrucciones Simples (¿Qué quieres que haga tu IA?)
                     </label>
                     <textarea
@@ -324,7 +344,7 @@ export default function ProjectDetailPage() {
                       placeholder="Ej: Quiero que venda zapatos y agende citas."
                       value={agentRawInstruction}
                       onChange={(e) => setAgentRawInstruction(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-xs resize-none"
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-sm resize-none"
                     />
                     <p className="text-[10px] text-slate-500">
                       Escribe con tus propias palabras. Nuestro Orquestador IA lo convertirá en un sistema técnico robusto.
@@ -334,7 +354,7 @@ export default function ProjectDetailPage() {
                   <button
                     type="submit"
                     disabled={isOrchestrating}
-                    className="w-full py-2.5 px-4 bg-[#0F766E] hover:bg-[#115E59] disabled:opacity-50 text-white font-bold rounded-lg text-xs transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                    className="w-full py-2.5 px-4 bg-[#0F766E] hover:bg-[#115E59] disabled:opacity-50 text-white font-bold rounded-lg text-sm transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     {isOrchestrating ? <Loader2 className="w-3.5 h-3.5 animate-spin text-white" /> : <Sparkles className="w-3.5 h-3.5 text-white" />}
                     {isOrchestrating ? 'Orquestando IA...' : 'Optimizar con IA'}
@@ -365,14 +385,14 @@ export default function ProjectDetailPage() {
                     <button
                       onClick={() => setOrchestratedData(null)}
                       disabled={agentLoading}
-                      className="flex-1 py-2.5 px-4 bg-white hover:bg-slate-50 disabled:opacity-50 border border-slate-300 text-slate-700 font-bold rounded-lg text-xs transition-all cursor-pointer"
+                      className="flex-1 py-2.5 px-4 bg-white hover:bg-slate-50 disabled:opacity-50 border border-slate-300 text-slate-700 font-bold rounded-lg text-sm transition-all cursor-pointer"
                     >
                       Editar Instrucciones
                     </button>
                     <button
                       onClick={handleConfirmCreateAgent}
                       disabled={agentLoading}
-                      className="flex-1 py-2.5 px-4 bg-[#0F766E] hover:bg-[#115E59] disabled:opacity-50 text-white font-bold rounded-lg text-xs transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="flex-1 py-2.5 px-4 bg-[#0F766E] hover:bg-[#115E59] disabled:opacity-50 text-white font-bold rounded-lg text-sm transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       {agentLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
                       Aceptar y Crear Agente
@@ -386,7 +406,7 @@ export default function ProjectDetailPage() {
           {/* List of Agents (Chats de la IA) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
             {agents.length === 0 ? (
-              <div className="col-span-2 text-center py-16 rounded-3xl border border-dashed border-slate-300 text-slate-500 bg-white text-xs">
+              <div className="col-span-2 text-center py-16 rounded-3xl border border-dashed border-slate-300 text-slate-500 bg-white text-sm">
                 <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center mx-auto mb-3">
                   <MessageSquare className="w-5 h-5 text-slate-400" />
                 </div>
@@ -396,20 +416,20 @@ export default function ProjectDetailPage() {
               agents.map((agent) => (
                 <div 
                   key={agent.id}
-                  className="bg-white rounded-2xl p-5 border border-slate-200 hover:border-[#0F766E]/30 shadow-sm hover:shadow-md transition-all flex flex-col justify-between group"
+                  className="bg-white rounded-2xl p-5 border border-slate-200 hover:border-[#0F766E]/30 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between group"
                 >
                   <div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center group-hover:border-[#0F766E]/30 group-hover:bg-[#0F766E]/5 transition-colors">
-                        <Bot className="w-4 h-4 text-[#0F766E]" />
+                    <div className="flex items-center gap-2.5 mb-2">
+                      <div className="w-9 h-9 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center group-hover:border-[#0F766E]/30 group-hover:bg-[#0F766E]/5 transition-colors">
+                        <Bot className="w-4.5 h-4.5 text-[#0F766E]" />
                       </div>
                       <div>
-                        <h4 className="text-xs font-bold text-slate-900">{agent.name}</h4>
-                        <span className="text-[10px] text-[#0F766E]/80 font-mono">slug: {agent.slug}</span>
+                        <h4 className="text-sm font-bold text-slate-900">{agent.name}</h4>
+                        <span className="text-[11px] text-[#0F766E]/80 font-mono">slug: {agent.slug}</span>
                       </div>
                     </div>
 
-                    <p className="text-[11px] text-slate-500 line-clamp-3 leading-relaxed mt-2.5 mb-4 h-12">
+                    <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed mt-2.5 mb-4 h-12">
                       {agent.systemInstruction}
                     </p>
                   </div>
@@ -417,7 +437,7 @@ export default function ProjectDetailPage() {
                   <div className="flex gap-2 border-t border-slate-100 pt-4 mt-2">
                     <Link
                       href={`/dashboard/project/${projectId}/agent/${agent.id}`}
-                      className="flex-1 py-1.5 px-3 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg text-xs font-semibold text-center text-slate-700 flex items-center justify-center gap-1 transition-all cursor-pointer"
+                      className="flex-1 py-2 px-3 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg text-sm font-semibold text-center text-slate-700 flex items-center justify-center gap-1 transition-all cursor-pointer"
                     >
                       Configurar Chat de la IA
                       <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />

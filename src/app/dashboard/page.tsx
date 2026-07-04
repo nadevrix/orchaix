@@ -4,9 +4,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
-import { 
-  Plus, Folder, PlusCircle, Bot, 
-  FileText, LogOut, Loader2, ArrowRight, User 
+import Skeleton from '@/components/Skeleton';
+import {
+  Plus, Folder, PlusCircle, Bot,
+  FileText, LogOut, Loader2, ArrowRight, User
 } from 'lucide-react';
 
 interface Project {
@@ -151,11 +152,34 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-10 h-10 text-[#0F766E] animate-spin" />
-          <p className="text-slate-500 text-sm">Cargando tu dashboard...</p>
-        </div>
+      <div className="min-h-screen bg-slate-50">
+        <nav className="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-40">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex justify-between h-16 items-center">
+              <Logo size={32} showText={true} />
+              <Skeleton className="h-8 w-48 rounded-lg" />
+            </div>
+          </div>
+        </nav>
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-10">
+            <div className="space-y-2">
+              <Skeleton className="h-9 w-56" />
+              <Skeleton className="h-4 w-80 max-w-full" />
+            </div>
+            <Skeleton className="h-11 w-44 rounded-xl" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} className="h-28 rounded-2xl" />
+            ))}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} className="h-52 rounded-2xl" />
+            ))}
+          </div>
+        </main>
       </div>
     );
   }
@@ -202,7 +226,7 @@ export default function DashboardPage() {
 
           <button
             onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#0F766E] hover:bg-[#115E59] text-white font-bold rounded-xl text-sm transition-all shadow-sm cursor-pointer animate-fade-in"
+            className="inline-flex items-center gap-2 px-5 py-3 bg-[#0F766E] hover:bg-[#115E59] text-white font-bold rounded-xl text-sm transition-all shadow-md hover:shadow-lg cursor-pointer animate-fade-in"
           >
             <Plus className="w-4 h-4" />
             Nuevo Proyecto
@@ -255,9 +279,9 @@ export default function DashboardPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
             {projects.map((project) => (
-              <div 
-                key={project.id} 
-                className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm relative overflow-hidden group hover:border-[#0F766E]/30 hover:shadow-md transition-all duration-300 flex flex-col justify-between"
+              <div
+                key={project.id}
+                className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm relative overflow-hidden group hover:border-[#0F766E]/30 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between"
               >
                 <div>
                   {/* Top Header Card */}
@@ -275,14 +299,14 @@ export default function DashboardPage() {
                     {project.name}
                   </h3>
                   
-                  <p className="text-xs text-slate-500 mt-1 line-clamp-2 h-8">
+                  <p className="text-sm text-slate-500 mt-1 line-clamp-2 h-10">
                     {project.description || 'Sin descripción disponible.'}
                   </p>
                 </div>
 
                 {/* Card Stats & Actions */}
                 <div className="mt-6 border-t border-slate-100 pt-4 flex justify-between items-center">
-                  <div className="flex gap-4 text-xs text-slate-500">
+                  <div className="flex gap-4 text-sm text-slate-500">
                     <span className="flex items-center gap-1">
                       <FileText className="w-3.5 h-3.5 text-slate-400" />
                       {project._count?.documents || 0} datos
@@ -312,7 +336,7 @@ export default function DashboardPage() {
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
           <div className="bg-white rounded-2xl w-full max-w-lg p-8 shadow-2xl border border-slate-200 relative overflow-hidden">
             <h2 className="text-xl font-bold text-slate-900 mb-2">Crear Nuevo Proyecto</h2>
-            <p className="text-xs text-slate-500 mb-6">Un proyecto es una entidad de negocio (ej. Tienda Calzado) que almacena datos y aloja chats de la IA.</p>
+            <p className="text-sm text-slate-500 mb-6">Un proyecto es una entidad de negocio (ej. Tienda Calzado) que almacena datos y aloja chats de la IA.</p>
 
             <form onSubmit={handleCreateProject} className="space-y-4">
               {modalError && (

@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'next/navigation';
-import Logo from '@/components/Logo';
+import AgentAvatar from '@/components/AgentAvatar';
+import TypingIndicator from '@/components/TypingIndicator';
 import { Send, Loader2, AlertTriangle, ShieldAlert, CheckCircle, RefreshCw } from 'lucide-react';
 
 interface AgentDetails {
@@ -150,7 +151,7 @@ export default function PublicAgentChatPage() {
             <ShieldAlert className="w-8 h-8 text-red-500" />
           </div>
           <h2 className="text-xl font-bold text-slate-900 mb-2">Contenido no disponible</h2>
-          <p className="text-slate-600 text-xs leading-relaxed">
+          <p className="text-slate-600 text-sm leading-relaxed">
             Lo sentimos, el propietario de **{agent?.merchantBusinessName}** ha configurado restricciones de acceso que impiden cargar este chatbot en tu ubicación (<span className="uppercase text-red-500 font-bold font-mono">{country}</span>).
           </p>
         </div>
@@ -167,7 +168,7 @@ export default function PublicAgentChatPage() {
             <AlertTriangle className="w-8 h-8 text-yellow-500" />
           </div>
           <h2 className="text-lg font-bold text-slate-900 mb-1">Enlace Inválido</h2>
-          <p className="text-slate-600 text-xs mb-6">
+          <p className="text-slate-600 text-sm mb-6">
             El agente de IA que intentas abrir no existe o el enlace está mal configurado.
           </p>
           <button 
@@ -189,10 +190,10 @@ export default function PublicAgentChatPage() {
       {/* Header */}
       <header className="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-30 px-6 py-4 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
-          <Logo size={32} showText={false} />
+          <AgentAvatar name={agent.name} size={36} />
           <div>
-            <h1 className="text-xs font-bold text-slate-900 leading-tight">{agent.name}</h1>
-            <p className="text-[10px] text-slate-500">Proyecto: {agent.projectName} | {agent.merchantBusinessName}</p>
+            <h1 className="text-sm font-bold text-slate-900 leading-tight">{agent.name}</h1>
+            <p className="text-[11px] text-slate-500">Proyecto: {agent.projectName} | {agent.merchantBusinessName}</p>
           </div>
         </div>
 
@@ -204,33 +205,38 @@ export default function PublicAgentChatPage() {
       {/* Chat Messages Log */}
       <main className="flex-1 overflow-y-auto px-6 py-8 space-y-4 max-w-3xl w-full mx-auto scrollbar-thin">
         {messages.map((msg, index) => (
-          <div 
+          <div
             key={index}
-            className={`flex flex-col max-w-[85%] ${
-              msg.sender === 'user' ? 'ml-auto items-end animate-fade-in' : 'mr-auto items-start animate-fade-in'
+            className={`flex gap-2.5 max-w-[85%] animate-message-in ${
+              msg.sender === 'user' ? 'ml-auto flex-row-reverse' : 'mr-auto'
             }`}
           >
-            <span className="text-[9px] text-slate-400 mb-0.5 px-1 uppercase tracking-wider">
-              {msg.sender === 'user' ? 'Tú' : agent.name}
-            </span>
-            <div 
-              className={`p-3.5 rounded-2xl text-xs leading-relaxed whitespace-pre-wrap shadow-sm ${
-                msg.sender === 'user' 
-                  ? 'bg-[#0F766E] text-white rounded-tr-none border border-[#115E59]' 
-                  : 'bg-white text-slate-700 border border-slate-200 rounded-tl-none leading-relaxed'
-              }`}
-            >
-              {msg.content}
+            {msg.sender === 'ai' && <AgentAvatar name={agent.name} size={30} />}
+            <div className={`flex flex-col min-w-0 ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
+              <span className="text-[10px] text-slate-400 mb-0.5 px-1 uppercase tracking-wider">
+                {msg.sender === 'user' ? 'Tú' : agent.name}
+              </span>
+              <div
+                className={`p-3.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap shadow-sm ${
+                  msg.sender === 'user'
+                    ? 'bg-[#0F766E] text-white rounded-tr-none border border-[#115E59]'
+                    : 'bg-white text-slate-700 border border-slate-200 rounded-tl-none'
+                }`}
+              >
+                {msg.content}
+              </div>
             </div>
           </div>
         ))}
 
         {chatLoading && (
-          <div className="flex flex-col max-w-[80%] mr-auto items-start animate-fade-in">
-            <span className="text-[9px] text-slate-400 mb-0.5 px-1">{agent.name}</span>
-            <div className="p-3.5 rounded-2xl bg-white text-slate-500 border border-slate-200 rounded-tl-none flex items-center gap-2 shadow-sm">
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0F766E]" />
-              <span className="text-xs">Escribiendo...</span>
+          <div className="flex gap-2.5 max-w-[80%] mr-auto animate-message-in">
+            <AgentAvatar name={agent.name} size={30} />
+            <div className="flex flex-col items-start">
+              <span className="text-[10px] text-slate-400 mb-0.5 px-1 uppercase tracking-wider">{agent.name}</span>
+              <div className="px-4 py-3 rounded-2xl bg-white border border-slate-200 rounded-tl-none shadow-sm">
+                <TypingIndicator />
+              </div>
             </div>
           </div>
         )}
@@ -248,7 +254,7 @@ export default function PublicAgentChatPage() {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               disabled={chatLoading}
-              className="flex-1 px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-xs shadow-sm"
+              className="flex-1 px-4 py-3 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-sm shadow-sm"
             />
             <button
               type="submit"

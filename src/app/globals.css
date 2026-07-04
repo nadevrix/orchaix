@@ -80,3 +80,40 @@ body {
 .glow-primary {
   box-shadow: 0 0 40px -5px rgba(15, 118, 110, 0.15);
 }
+
+/* Entrada de mensajes del chat */
+@keyframes messageIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-message-in {
+  animation: messageIn 0.25s ease-out forwards;
+}
+
+/* Indicador de escritura (tres puntos) */
+@keyframes typingBounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+.typing-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--primary);
+  animation: typingBounce 1.2s ease-in-out infinite;
+}

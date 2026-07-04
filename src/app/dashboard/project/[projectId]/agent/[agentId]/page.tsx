@@ -4,6 +4,9 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter as useAppRouter, useParams as useAppParams } from 'next/navigation';
 import Link from 'next/link';
 import Logo from '@/components/Logo';
+import Skeleton from '@/components/Skeleton';
+import AgentAvatar from '@/components/AgentAvatar';
+import TypingIndicator from '@/components/TypingIndicator';
 import {
   ArrowLeft, Settings, Code, Send, Loader2, Sparkles, Check, Copy, RefreshCw, MessageSquare, HelpCircle, FileText, Plus, Trash2, Upload
 } from 'lucide-react';
@@ -376,10 +379,37 @@ export default function AgentDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="w-10 h-10 text-[#0F766E] animate-spin" />
-          <p className="text-slate-500 text-sm">Cargando configuración del chat...</p>
+      <div className="min-h-screen bg-slate-50 flex flex-col">
+        <nav className="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-40">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex h-16 items-center gap-4">
+              <Skeleton className="w-8 h-8 rounded-lg" />
+              <Logo size={28} showText={false} />
+              <div className="space-y-1.5">
+                <Skeleton className="h-3.5 w-32" />
+                <Skeleton className="h-2.5 w-44" />
+              </div>
+            </div>
+          </div>
+        </nav>
+        <div className="flex-1 flex flex-col lg:flex-row">
+          <div className="flex-1 p-6 sm:p-8 lg:border-r border-slate-200">
+            <div className="max-w-3xl mx-auto space-y-8">
+              <Skeleton className="h-12 rounded-xl" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Skeleton className="h-16 rounded-lg" />
+                <Skeleton className="h-16 rounded-lg" />
+              </div>
+              <Skeleton className="h-40 rounded-xl" />
+              <Skeleton className="h-32 rounded-xl" />
+            </div>
+          </div>
+          <div className="w-full lg:w-96 bg-white border-t lg:border-t-0 border-slate-200 p-4 space-y-4">
+            <Skeleton className="h-8 rounded-lg" />
+            <Skeleton className="h-16 w-3/4 rounded-2xl" />
+            <Skeleton className="h-12 w-1/2 rounded-2xl ml-auto" />
+            <Skeleton className="h-16 w-2/3 rounded-2xl" />
+          </div>
         </div>
       </div>
     );
@@ -453,8 +483,9 @@ export default function AgentDetailPage() {
                     : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
-                <Settings className="w-3.5 h-3.5" />
-                Instrucciones y Ajustes del Chat de la IA
+                <Settings className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Instrucciones y Ajustes del Chat de la IA</span>
+                <span className="sm:hidden">Ajustes</span>
               </button>
 
               <button
@@ -465,8 +496,9 @@ export default function AgentDetailPage() {
                     : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
-                <FileText className="w-3.5 h-3.5" />
-                Datos del Comercio (Chat de la IA)
+                <FileText className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Datos del Comercio (Chat de la IA)</span>
+                <span className="sm:hidden">Datos</span>
               </button>
 
               <button
@@ -477,8 +509,9 @@ export default function AgentDetailPage() {
                     : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
-                <Code className="w-3.5 h-3.5" />
-                Widget e Integraciones
+                <Code className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Widget e Integraciones</span>
+                <span className="sm:hidden">Widget</span>
               </button>
             </div>
 
@@ -508,7 +541,7 @@ export default function AgentDetailPage() {
                       required
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-xs"
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-sm"
                     />
                   </div>
 
@@ -521,7 +554,7 @@ export default function AgentDetailPage() {
                       required
                       value={slug}
                       onChange={(e) => setSlug(e.target.value.toLowerCase().replace(/\s+/g, '-'))}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-xs font-mono"
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-sm font-mono"
                     />
                   </div>
                 </div>
@@ -539,13 +572,13 @@ export default function AgentDetailPage() {
                       placeholder="Ej: Quiero que venda zapatos..."
                       value={rawInstruction}
                       onChange={(e) => setRawInstruction(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-xs resize-none"
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-sm resize-none"
                     />
                     <button
                       type="button"
                       onClick={handleOrchestrateAgent}
                       disabled={isOrchestrating || !rawInstruction.trim()}
-                      className="w-full mt-2 py-2 px-4 bg-[#0F766E] hover:bg-[#115E59] disabled:opacity-50 text-white font-bold rounded-lg text-xs transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full mt-2 py-2 px-4 bg-[#0F766E] hover:bg-[#115E59] disabled:opacity-50 text-white font-bold rounded-lg text-sm transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       {isOrchestrating ? <Loader2 className="w-3.5 h-3.5 animate-spin text-white" /> : <Sparkles className="w-3.5 h-3.5 text-white" />}
                       {isOrchestrating ? 'Orquestando IA...' : 'Re-Optimizar con Orquestador IA'}
@@ -566,7 +599,7 @@ export default function AgentDetailPage() {
                       rows={6}
                       value={systemInstruction}
                       onChange={(e) => setSystemInstruction(e.target.value)}
-                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-500 focus:text-slate-900 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-xs resize-none font-mono"
+                      className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-500 focus:text-slate-900 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-sm resize-none font-mono"
                     />
                     <p className="text-[10px] text-slate-500 leading-normal">
                       Este Chat de la IA consultará de forma autónoma los documentos cargados en su pestaña de "Datos del Comercio".
@@ -584,7 +617,7 @@ export default function AgentDetailPage() {
                     placeholder="Ej: 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
                     value={telegramToken}
                     onChange={(e) => setTelegramToken(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-xs font-mono"
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-sm font-mono"
                   />
                   <p className="text-[10px] text-slate-500 leading-normal">
                     Si asignas un token de Telegram para este Chat de la IA, este bot responderá automáticamente en los chats de Telegram usando la personalidad de este Chat de la IA y sus datos del comercio.
@@ -595,7 +628,7 @@ export default function AgentDetailPage() {
                 <button
                   type="submit"
                   disabled={configLoading}
-                  className="w-full py-2.5 px-4 bg-[#0F766E] hover:bg-[#115E59] disabled:opacity-50 text-white font-bold rounded-lg text-xs transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                  className="w-full py-2.5 px-4 bg-[#0F766E] hover:bg-[#115E59] disabled:opacity-50 text-white font-bold rounded-lg text-sm transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   {configLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
                   Guardar Configuración
@@ -608,11 +641,11 @@ export default function AgentDetailPage() {
               <div className="space-y-8 animate-fade-in">
                 {/* Upload de archivos */}
                 <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                  <h3 className="text-base font-bold text-slate-900 mb-1 flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-slate-900 mb-1 flex items-center gap-2">
                     <Upload className="w-4 h-4 text-[#0F766E]" />
                     Subir Documento
                   </h3>
-                  <p className="text-xs text-slate-500 mb-4">
+                  <p className="text-sm text-slate-500 mb-4">
                     Sube catálogos, listas de precios o políticas en PDF, Word, TXT, Markdown o CSV. El texto se extrae automáticamente y la IA lo usará para responder.
                   </p>
 
@@ -672,11 +705,11 @@ export default function AgentDetailPage() {
                 </div>
 
                 <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm relative overflow-hidden">
-                  <h3 className="text-base font-bold text-slate-900 mb-1 flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-slate-900 mb-1 flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-[#0F766E]" />
                     Cargar Datos Manualmente
                   </h3>
-                  <p className="text-xs text-slate-500 mb-4">
+                  <p className="text-sm text-slate-500 mb-4">
                     Agrega catálogos de precios, FAQs o políticas específicas para este Chat de la IA. Este asistente interactuará con el usuario basándose únicamente en esta información.
                   </p>
 
@@ -688,7 +721,7 @@ export default function AgentDetailPage() {
                     )}
 
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
+                      <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
                         Título de la Sección / Documento
                       </label>
                       <input
@@ -697,12 +730,12 @@ export default function AgentDetailPage() {
                         placeholder="Ej: Políticas de Reembolso, Lista de Productos"
                         value={docTitle}
                         onChange={(e) => setDocTitle(e.target.value)}
-                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-xs"
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-sm"
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider block">
+                      <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
                         Contenido Seco (RAG Context)
                       </label>
                       <textarea
@@ -711,14 +744,14 @@ export default function AgentDetailPage() {
                         placeholder="Escribe la información detallada aquí. La IA no inventará datos fuera de esto."
                         value={docContent}
                         onChange={(e) => setDocContent(e.target.value)}
-                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-xs resize-none"
+                        className="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-sm resize-none"
                       />
                     </div>
 
                     <button
                       type="submit"
                       disabled={docLoading}
-                      className="w-full py-2.5 px-4 bg-[#0F766E] hover:bg-[#115E59] disabled:opacity-50 text-white font-bold rounded-lg text-xs transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full py-2.5 px-4 bg-[#0F766E] hover:bg-[#115E59] disabled:opacity-50 text-white font-bold rounded-lg text-sm transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       {docLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Plus className="w-3.5 h-3.5" />}
                       Cargar Datos de Negocio
@@ -732,7 +765,7 @@ export default function AgentDetailPage() {
                   </h3>
 
                   {documents.length === 0 ? (
-                    <div className="text-center py-12 rounded-2xl border border-dashed border-slate-300 bg-white text-slate-500 text-xs shadow-sm">
+                    <div className="text-center py-12 rounded-2xl border border-dashed border-slate-300 bg-white text-slate-500 text-sm shadow-sm">
                       Este chat de la IA no tiene información cargada. Responderá de forma genérica o indicará que no posee datos.
                     </div>
                   ) : (
@@ -744,7 +777,7 @@ export default function AgentDetailPage() {
                         >
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
-                              <h4 className="text-xs font-bold text-slate-900 truncate">{doc.title}</h4>
+                              <h4 className="text-sm font-bold text-slate-900 truncate">{doc.title}</h4>
                               {doc.sourceType === 'file' && (
                                 <span className="shrink-0 inline-flex items-center gap-1 text-[9px] font-semibold text-[#0F766E] bg-[#0F766E]/5 border border-[#0F766E]/10 px-1.5 py-0.5 rounded uppercase tracking-wider">
                                   <FileText className="w-2.5 h-2.5" />
@@ -752,7 +785,7 @@ export default function AgentDetailPage() {
                                 </span>
                               )}
                             </div>
-                            <p className="text-[11px] text-slate-500 mt-1 line-clamp-3 leading-relaxed whitespace-pre-line">
+                            <p className="text-xs text-slate-500 mt-1 line-clamp-3 leading-relaxed whitespace-pre-line">
                               {doc.content}
                             </p>
                           </div>
@@ -896,31 +929,36 @@ export default function AgentDetailPage() {
           {/* Chat area */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-thin bg-white">
             {messages.map((msg, index) => (
-              <div 
+              <div
                 key={index}
-                className={`flex flex-col max-w-[85%] ${msg.sender === 'user' ? 'ml-auto items-end' : 'mr-auto items-start'}`}
+                className={`flex gap-2 max-w-[85%] animate-message-in ${msg.sender === 'user' ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}
               >
-                <span className="text-[9px] text-slate-400 mb-0.5 px-1 uppercase tracking-wider">
-                  {msg.sender === 'user' ? 'Tú' : agent?.name || 'IA'}
-                </span>
-                <div 
-                  className={`p-3 rounded-2xl text-xs leading-relaxed whitespace-pre-wrap shadow-sm ${
-                    msg.sender === 'user' 
-                      ? 'bg-[#0F766E] text-white border border-[#115E59] rounded-tr-none' 
-                      : 'bg-slate-50 text-slate-700 border border-slate-200 rounded-tl-none'
-                  }`}
-                >
-                  {msg.content}
+                {msg.sender === 'ai' && <AgentAvatar name={agent?.name} size={26} />}
+                <div className={`flex flex-col min-w-0 ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
+                  <span className="text-[10px] text-slate-400 mb-0.5 px-1 uppercase tracking-wider">
+                    {msg.sender === 'user' ? 'Tú' : agent?.name || 'IA'}
+                  </span>
+                  <div
+                    className={`p-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap shadow-sm ${
+                      msg.sender === 'user'
+                        ? 'bg-[#0F766E] text-white border border-[#115E59] rounded-tr-none'
+                        : 'bg-slate-50 text-slate-700 border border-slate-200 rounded-tl-none'
+                    }`}
+                  >
+                    {msg.content}
+                  </div>
                 </div>
               </div>
             ))}
 
             {chatLoading && (
-              <div className="flex flex-col max-w-[80%] mr-auto items-start">
-                <span className="text-[9px] text-slate-400 mb-0.5 px-1">{agent?.name || 'IA'}</span>
-                <div className="p-3 rounded-2xl bg-slate-50 text-slate-500 border border-slate-200 rounded-tl-none flex items-center gap-1.5 shadow-sm">
-                  <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0F766E]" />
-                  <span className="text-xs">Pensando...</span>
+              <div className="flex gap-2 max-w-[80%] mr-auto animate-message-in">
+                <AgentAvatar name={agent?.name} size={26} />
+                <div className="flex flex-col items-start">
+                  <span className="text-[10px] text-slate-400 mb-0.5 px-1 uppercase tracking-wider">{agent?.name || 'IA'}</span>
+                  <div className="px-3 py-2.5 rounded-2xl bg-slate-50 border border-slate-200 rounded-tl-none shadow-sm">
+                    <TypingIndicator />
+                  </div>
                 </div>
               </div>
             )}
@@ -935,7 +973,7 @@ export default function AgentDetailPage() {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 disabled={chatLoading}
-                className="flex-1 px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-xs shadow-sm"
+                className="flex-1 px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0F766E] focus:ring-1 focus:ring-[#0F766E] transition-all text-sm shadow-sm"
               />
               <button
                 type="submit"
