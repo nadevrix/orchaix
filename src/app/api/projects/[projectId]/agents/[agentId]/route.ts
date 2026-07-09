@@ -1,7 +1,7 @@
-import { randomBytes } from 'crypto';
 import { NextResponse } from 'next/server';
 import { getMerchantFromRequest } from '@/lib/jwt';
 import { prisma } from '@/lib/prisma';
+import { registerTelegramWebhook } from '@/lib/telegram';
 
 // GET /api/projects/[projectId]/agents/[agentId] - Retrieve agent details
 export async function GET(
@@ -85,41 +85,13 @@ export async function PUT(
     if (telegramToken !== undefined) {
       updateData.telegramToken = telegramToken || null;
 
-      // If token is updated and not empty, register the Telegram webhook.
-      // El webhook lleva el ID del agente en la URL y un secreto que Telegram
-      // reenvía en cada update (header X-Telegram-Bot-Api-Secret-Token); así el
-      // token del bot nunca viaja en la URL y nadie puede falsificar updates.
+      // If token is updated and not empty, register the Telegram webhook
       if (telegramToken && telegramToken !== agent.telegramToken) {
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tudominio.com';
-        const webhookSecret = randomBytes(32).toString('hex');
-        const webhookUrl = `${appUrl}/api/webhook/telegram?agent=${agentId}`;
-
-        try {
-          const res = await fetch(`https://api.telegram.org/bot${telegramToken}/setWebhook`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url: webhookUrl, secret_token: webhookSecret }),
-          });
-          const data = await res.json().catch(() => ({}));
-
-          if (!res.ok || !data.ok) {
-            console.error('Error de API de Telegram setWebhook:', data);
-            return NextResponse.json(
-              {
-                error: `Telegram rechazó el token del bot: ${data.description || 'verifica que el token de @BotFather sea correcto'}`,
-              },
-              { status: 400 }
-            );
-          }
-        } catch (err) {
-          console.error('Error de conexión de Telegram setWebhook:', err);
-          return NextResponse.json(
-            { error: 'No se pudo conectar con Telegram para registrar el webhook. Inténtalo de nuevo.' },
-            { status: 502 }
-          );
+        const registration = await registerTelegramWebhook(agentId, telegramToken);
+        if (!registration.ok) {
+          return NextResponse.json({ error: registration.error }, { status: registration.status });
         }
-
-        updateData.telegramSecret = webhookSecret;
+        updateData.telegramSecret = registration.secret;
       } else if (!telegramToken) {
         updateData.telegramSecret = null;
       }

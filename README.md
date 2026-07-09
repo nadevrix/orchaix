@@ -76,7 +76,14 @@ mobile/, desktop/     # Prototipos (Expo / Electron) — no productivos aún
 
 ## Documentación
 
-- [API pública para integraciones](docs/API.md) — cómo consumir un agente desde una app externa.
+Documentación completa en [`docs/`](docs/README.md):
+
+- [Arquitectura y modelo de datos](docs/ARQUITECTURA.md)
+- [Flujos principales paso a paso](docs/FLUJOS.md)
+- [API pública para integraciones](docs/API.md)
+- [API interna del dashboard](docs/API-INTERNA.md)
+- [Guía de desarrollo y deploy](docs/DESARROLLO.md)
+- [Pendientes y deuda técnica](docs/PENDIENTES.md)
 
 ## Roadmap
 

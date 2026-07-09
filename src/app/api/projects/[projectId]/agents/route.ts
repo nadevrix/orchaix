@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getMerchantFromRequest } from '@/lib/jwt';
 import { prisma } from '@/lib/prisma';
+import { registerTelegramWebhook } from '@/lib/telegram';
 
 // GET /api/projects/[projectId]/agents - List all agents of a project
 export async function GET(
@@ -106,35 +107,29 @@ export async function POST(
       );
     }
 
-    const agent = await prisma.agent.create({
+    let agent = await prisma.agent.create({
       data: {
         projectId,
         name,
         slug: slug.toLowerCase(),
         systemInstruction,
         rawInstruction,
-        telegramToken: telegramToken || null,
       },
     });
 
-    // If telegram token is provided, set webhook
+    // Si viene token de Telegram, registrar el webhook. El registro necesita el
+    // ID del agente, por eso se crea primero; si Telegram rechaza el token se
+    // revierte la creación para no dejar un agente con un bot muerto.
     if (telegramToken) {
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://tudominio.com';
-      const webhookUrl = `${appUrl}/api/webhook/telegram?token=${telegramToken}`;
-      const telegramSetWebhookUrl = `https://api.telegram.org/bot${telegramToken}/setWebhook?url=${encodeURIComponent(webhookUrl)}`;
-
-      fetch(telegramSetWebhookUrl)
-        .then(async (res) => {
-          const data = await res.json().catch(() => ({}));
-          if (res.ok && data.ok) {
-            console.log(`Telegram Webhook configurado con éxito para el agente ${agent.id}`);
-          } else {
-            console.error('Error de API de Telegram setWebhook:', data);
-          }
-        })
-        .catch((err) => {
-          console.error('Error de conexión de Telegram setWebhook:', err);
-        });
+      const registration = await registerTelegramWebhook(agent.id, telegramToken);
+      if (!registration.ok) {
+        await prisma.agent.delete({ where: { id: agent.id } });
+        return NextResponse.json({ error: registration.error }, { status: registration.status });
+      }
+      agent = await prisma.agent.update({
+        where: { id: agent.id },
+        data: { telegramToken, telegramSecret: registration.secret },
+      });
     }
 
     return NextResponse.json({
