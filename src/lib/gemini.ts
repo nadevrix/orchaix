@@ -13,6 +13,33 @@ interface ChatMessage {
   content: string;
 }
 
+// Límites del contexto RAG. Sin esto, un PDF de 200 páginas subido por el
+// comercio entraría completo al prompt en cada mensaje (lento y caro).
+const MAX_DOC_CHARS = 8_000;
+const MAX_CONTEXT_CHARS = 20_000;
+
+/**
+ * Recorta un documento largo a una ventana de MAX_DOC_CHARS centrada en la
+ * primera coincidencia de keywords (o el inicio si no hay coincidencias).
+ */
+function docExcerpt(content: string, keywords: string[]): string {
+  if (content.length <= MAX_DOC_CHARS) return content;
+
+  const contentLower = content.toLowerCase();
+  let matchIndex = -1;
+  for (const word of keywords) {
+    const idx = contentLower.indexOf(word);
+    if (idx !== -1 && (matchIndex === -1 || idx < matchIndex)) matchIndex = idx;
+  }
+
+  const start = Math.max(
+    0,
+    Math.min(matchIndex === -1 ? 0 : matchIndex - MAX_DOC_CHARS / 2, content.length - MAX_DOC_CHARS)
+  );
+  const end = start + MAX_DOC_CHARS;
+  return `${start > 0 ? '…' : ''}${content.slice(start, end)}${end < content.length ? '…' : ''}`;
+}
+
 /**
  * Perform a simple keyword-matching search over the project's documents to extract relevant context.
  * This acts as a lightweight, zero-dependency RAG engine.
@@ -31,8 +58,9 @@ export function getRelevantContext(query: string, documents: { title: string; co
     // If no keywords match, return the first few documents as fallback
     return documents
       .slice(0, 3)
-      .map((d) => `[INFORMACIÓN: ${d.title}]\n${d.content}`)
-      .join('\n\n');
+      .map((d) => `[INFORMACIÓN: ${d.title}]\n${docExcerpt(d.content, [])}`)
+      .join('\n\n')
+      .slice(0, MAX_CONTEXT_CHARS);
   }
 
   // Score documents based on keyword frequencies
@@ -62,13 +90,15 @@ export function getRelevantContext(query: string, documents: { title: string; co
   if (relevantDocs.length === 0) {
     return documents
       .slice(0, 2)
-      .map((d) => `[INFORMACIÓN: ${d.title}]\n${d.content}`)
-      .join('\n\n');
+      .map((d) => `[INFORMACIÓN: ${d.title}]\n${docExcerpt(d.content, keywords)}`)
+      .join('\n\n')
+      .slice(0, MAX_CONTEXT_CHARS);
   }
 
   return relevantDocs
-    .map((d) => `[INFORMACIÓN DEL NEGOCIO - TÍTULO: ${d.title}]\n${d.content}`)
-    .join('\n\n');
+    .map((d) => `[INFORMACIÓN DEL NEGOCIO - TÍTULO: ${d.title}]\n${docExcerpt(d.content, keywords)}`)
+    .join('\n\n')
+    .slice(0, MAX_CONTEXT_CHARS);
 }
 
 /**

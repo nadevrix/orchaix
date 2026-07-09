@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { getMerchantFromRequest } from '@/lib/jwt';
 import { ai } from '@/lib/gemini';
 
+// La llamada a Gemini puede superar los 10s por defecto de Vercel
+export const maxDuration = 60;
+
 // POST /api/orchestrate
 export async function POST(req: Request) {
   try {

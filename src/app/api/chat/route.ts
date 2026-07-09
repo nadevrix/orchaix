@@ -4,6 +4,9 @@ import { getRelevantContext, askGemini } from '@/lib/gemini';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 import { isWithinDailyLimit, recordUsage } from '@/lib/usage';
 
+// La llamada a Gemini puede superar los 10s por defecto de Vercel
+export const maxDuration = 60;
+
 // Máximo de mensajes por minuto por IP hacia un mismo agente
 const RATE_LIMIT_PER_MINUTE = 20;
 

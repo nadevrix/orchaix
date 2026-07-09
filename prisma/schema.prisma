@@ -44,6 +44,7 @@ model Agent {
   rawInstruction    String?       @db.Text
   systemInstruction String        @db.Text
   telegramToken     String?       // Token del bot de Telegram específico de este agente
+  telegramSecret    String?       // Secreto usado para validar que los updates del webhook vienen de Telegram
   chatSessions      ChatSession[]
   documents         Document[]
   createdAt         DateTime      @default(now())

@@ -4,27 +4,88 @@ import { getRelevantContext, askGemini } from '@/lib/gemini';
 import { checkRateLimit } from '@/lib/rate-limit';
 import { isWithinDailyLimit, recordUsage } from '@/lib/usage';
 
+// Gemini + la respuesta a Telegram pueden superar los 10s por defecto de Vercel
+export const maxDuration = 60;
+
 // Máximo de mensajes por minuto por chat de Telegram
 const RATE_LIMIT_PER_MINUTE = 15;
 
+/**
+ * Envía un mensaje a Telegram. Intenta primero con Markdown; si Telegram
+ * rechaza el formato (pasa seguido: la IA genera Markdown que el parser
+ * legacy de Telegram no acepta), reintenta como texto plano para que el
+ * mensaje siempre llegue.
+ */
+async function sendTelegramMessage(botToken: string, chatId: number | string, text: string) {
+  const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+  const send = (parseMode?: string) =>
+    fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text,
+        ...(parseMode ? { parse_mode: parseMode } : {}),
+      }),
+    });
+
+  let response = await send('Markdown');
+  if (!response.ok) {
+    response = await send();
+  }
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`Error al enviar mensaje a Telegram (chat_id: ${chatId}):`, errorText);
+  }
+}
+
 export async function POST(req: Request) {
   try {
-    // 1. Get token from query parameters
     const { searchParams } = new URL(req.url);
-    const token = searchParams.get('token');
+    const agentIdParam = searchParams.get('agent');
+    const legacyToken = searchParams.get('token');
 
-    if (!token) {
-      console.warn('Webhook Telegram llamado sin token query param.');
-      return NextResponse.json({ ok: false, error: 'Token no especificado' }, { status: 200 });
+    // 1. Resolver el agente destino.
+    //    Modo actual: ?agent=<id> + header secreto que solo Telegram conoce.
+    //    Modo legado: ?token=<botToken> (webhooks registrados antes del cambio).
+    let agent = null;
+    if (agentIdParam) {
+      agent = await prisma.agent.findUnique({
+        where: { id: agentIdParam },
+        include: {
+          documents: true,
+          project: { select: { merchantId: true } },
+        },
+      });
+
+      const secretHeader = req.headers.get('x-telegram-bot-api-secret-token');
+      if (!agent || !agent.telegramSecret || secretHeader !== agent.telegramSecret) {
+        console.warn(`Webhook Telegram rechazado para agente ${agentIdParam}: secreto inválido o ausente.`);
+        return NextResponse.json({ ok: true });
+      }
+    } else if (legacyToken) {
+      agent = await prisma.agent.findFirst({
+        where: { telegramToken: legacyToken },
+        include: {
+          documents: true,
+          project: { select: { merchantId: true } },
+        },
+      });
+    }
+
+    if (!agent || !agent.telegramToken) {
+      console.warn('Webhook Telegram llamado sin agente válido.');
+      // Return 200 OK so Telegram stops retrying this update
+      return NextResponse.json({ ok: true });
     }
 
     const body = await req.json().catch(() => null);
     if (!body || !body.message) {
-      // Return 200 OK so Telegram stops sending this update
       return NextResponse.json({ ok: true });
     }
 
-    const { chat, text, from } = body.message;
+    const { chat, text } = body.message;
     const chatId = chat?.id;
     const userText = text?.trim();
 
@@ -39,21 +100,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true });
     }
 
-    // 2. Find the agent registered with this telegram bot token
-    const agent = await prisma.agent.findFirst({
-      where: { telegramToken: token },
-      include: {
-        documents: true,
-        project: { select: { merchantId: true } },
-      },
-    });
-
-    if (!agent) {
-      console.error(`Ningún agente registrado con el token de Telegram: ${token}`);
-      return NextResponse.json({ ok: true });
-    }
-
-    // 2b. Tope diario persistente por agente (control de costos)
+    // 2. Tope diario persistente por agente (control de costos)
     if (!(await isWithinDailyLimit(agent.id))) {
       return NextResponse.json({ ok: true });
     }
@@ -131,21 +178,7 @@ export async function POST(req: Request) {
     await recordUsage(agent.id, agent.project.merchantId);
 
     // 8. Reply back to Telegram
-    const telegramUrl = `https://api.telegram.org/bot${token}/sendMessage`;
-    const response = await fetch(telegramUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: aiResponse,
-        parse_mode: 'Markdown', // Gemini responds in Markdown, which Telegram renders beautifully
-      }),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Error al enviar mensaje a Telegram (chat_id: ${chatId}):`, errorText);
-    }
+    await sendTelegramMessage(agent.telegramToken, chatId, aiResponse);
 
     return NextResponse.json({ ok: true });
   } catch (error: any) {
